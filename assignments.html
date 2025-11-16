@@ -1,0 +1,228 @@
+// assignments.js
+import { supabase } from './supabase.js';
+
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('Assignments page loaded');
+    
+    const materialHeader = document.getElementById('materialHeader');
+    const assignmentsContainer = document.getElementById('assignmentsContainer');
+    const backBtn = document.getElementById('backBtn');
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const materialId = urlParams.get('material_id');
+
+    console.log('Material ID from URL:', materialId);
+
+    if (!materialId) {
+        console.error('No material_id found in URL');
+        showError('Материал не найден. Пожалуйста, вернитесь к материалам и выберите тему.');
+        return;
+    }
+
+    // Загружаем материал и задания
+    loadMaterialAndAssignments(materialId);
+
+    backBtn.addEventListener('click', function() {
+        console.log('Back button clicked');
+        window.location.href = 'materials.html';
+    });
+
+    async function loadMaterialAndAssignments(materialId) {
+        console.log('Starting to load material and assignments for ID:', materialId);
+        
+        try {
+            // Показываем загрузку
+            showLoading();
+
+            // Загружаем материал
+            console.log('Fetching material from Supabase...');
+            const { data: material, error: materialError } = await supabase
+                .from('materials')
+                .select('*')
+                .eq('id', materialId)
+                .single();
+
+            if (materialError) {
+                console.error('Supabase material error:', materialError);
+                throw new Error(`Ошибка загрузки материала: ${materialError.message}`);
+            }
+
+            if (!material) {
+                console.error('Material not found for ID:', materialId);
+                throw new Error('Материал не найден');
+            }
+
+            console.log('Material loaded:', material);
+
+            // Отображаем заголовок материала
+            renderMaterialHeader(material);
+
+            // Загружаем задания для материала
+            console.log('Fetching assignments from Supabase...');
+            const { data: assignments, error: assignmentsError } = await supabase
+                .from('assignments')
+                .select('*')
+                .eq('material_id', materialId)
+                .order('created_at', { ascending: true });
+
+            if (assignmentsError) {
+                console.error('Supabase assignments error:', assignmentsError);
+                throw new Error(`Ошибка загрузки заданий: ${assignmentsError.message}`);
+            }
+
+            console.log('Assignments loaded:', assignments);
+            renderAssignments(assignments);
+
+        } catch (error) {
+            console.error('Error in loadMaterialAndAssignments:', error);
+            showError(error.message || 'Не удалось загрузить задания');
+        }
+    }
+
+    function renderMaterialHeader(material) {
+        console.log('Rendering material header:', material);
+        
+        const materialIcon = getMaterialIcon(material.title);
+        let imageHtml = '';
+        
+        if (material.image_url) {
+            imageHtml = `<img src="${material.image_url}" alt="${material.title}" 
+                          onerror="this.style.display='none'; this.parentElement.innerHTML='${materialIcon}'">`;
+        } else {
+            imageHtml = materialIcon;
+        }
+
+        materialHeader.innerHTML = `
+            <div class="material-play-header">
+                <div class="material-preview-large">
+                    ${imageHtml}
+                </div>
+                <div class="material-info-large">
+                    <h2>${material.title}</h2>
+                    <p>Выберите задание для выполнения</p>
+                </div>
+            </div>
+        `;
+    }
+
+    function renderAssignments(assignments) {
+        console.log('Rendering assignments:', assignments);
+        
+        if (!assignments || assignments.length === 0) {
+            assignmentsContainer.innerHTML = `
+                <div class="empty-state">
+                    <i class="fas fa-tasks"></i>
+                    <h3>Заданий пока нет</h3>
+                    <p>Для этого материала еще не созданы задания</p>
+                    <button class="btn btn-primary" onclick="window.location.href = 'materials.html'">
+                        <i class="fas fa-arrow-left"></i>
+                        Вернуться к материалам
+                    </button>
+                </div>
+            `;
+            return;
+        }
+
+        assignmentsContainer.innerHTML = `
+            <div class="assignments-grid">
+                ${assignments.map(assignment => `
+                    <div class="assignment-play-card" data-id="${assignment.id}">
+                        <div class="assignment-play-header">
+                            <h3>${assignment.title}</h3>
+                            <span class="assignment-type-badge">${getAssignmentTypeLabel(assignment.question_type)}</span>
+                        </div>
+                        <div class="assignment-play-content">
+                            <p>${assignment.description || 'Интересное задание для развития навыков'}</p>
+                            <div class="assignment-play-meta">
+                                <span><i class="fas fa-question-circle"></i> ${assignment.questions?.length || 0} вопросов</span>
+                                ${assignment.sound_letter ? `<span><i class="fas fa-volume-up"></i> Звук: ${assignment.sound_letter}</span>` : ''}
+                            </div>
+                        </div>
+                        <div class="assignment-play-actions">
+                            <button class="btn btn-primary start-assignment" data-id="${assignment.id}">
+                                <i class="fas fa-play"></i>
+                                Начать выполнение
+                            </button>
+                        </div>
+                    </div>
+                `).join('')}
+            </div>
+        `;
+
+        // Добавляем обработчики для кнопок начала выполнения
+        document.querySelectorAll('.start-assignment').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const assignmentId = this.getAttribute('data-id');
+                console.log('Starting assignment:', assignmentId);
+                window.location.href = `assignment-play.html?assignment_id=${assignmentId}`;
+            });
+        });
+    }
+
+    function showLoading() {
+        materialHeader.innerHTML = `
+            <div class="loading-spinner">
+                <div class="spinner"></div>
+                <p>Загружаем материал...</p>
+            </div>
+        `;
+        
+        assignmentsContainer.innerHTML = `
+            <div class="loading-spinner">
+                <div class="spinner"></div>
+                <p>Загружаем задания...</p>
+            </div>
+        `;
+    }
+
+    function getMaterialIcon(title) {
+        if (!title) return '📖';
+        
+        const lowerTitle = title.toLowerCase();
+        if (lowerTitle.includes('математи') || lowerTitle.includes('счет')) return '🔢';
+        if (lowerTitle.includes('букв') || lowerTitle.includes('алфавит') || lowerTitle.includes('слов')) return '📚';
+        if (lowerTitle.includes('загад') || lowerTitle.includes('головолом')) return '🎯';
+        if (lowerTitle.includes('рисован') || lowerTitle.includes('творчеств')) return '🎨';
+        if (lowerTitle.includes('природ') || lowerTitle.includes('животн')) return '🐾';
+        return '📖';
+    }
+
+    function getAssignmentTypeLabel(type) {
+        const types = {
+            'type1': 'Выбор картинок со звуком',
+            'type2': 'Схема "начало-середина-конец"',
+            'type3': 'Деление на слоги',
+            'type4': 'Разделение по категориям'
+        };
+        return types[type] || type || 'Задание';
+    }
+
+    function showError(message) {
+        console.error('Showing error:', message);
+        
+        materialHeader.innerHTML = `
+            <div class="error-message">
+                <i class="fas fa-exclamation-triangle"></i>
+                <h3>Ошибка</h3>
+            </div>
+        `;
+        
+        assignmentsContainer.innerHTML = `
+            <div class="error-message">
+                <i class="fas fa-exclamation-triangle"></i>
+                <h3>Ошибка загрузки</h3>
+                <p>${message}</p>
+                <div class="error-actions">
+                    <button class="btn btn-primary" onclick="window.location.href = 'materials.html'">
+                        <i class="fas fa-arrow-left"></i>
+                        Вернуться к материалам
+                    </button>
+                    <button class="btn btn-secondary" onclick="location.reload()">
+                        <i class="fas fa-redo"></i>
+                        Попробовать снова
+                    </button>
+                </div>
+            </div>
+        `;
+    }
+});
