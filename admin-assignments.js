@@ -10,6 +10,7 @@ export class AssignmentManager {
         this.materials = [];
         this.questions = [];
         this.uploadedImages = new Map();
+        this.unsavedQuestionData = null; // Для хранения несохраненного вопроса
         
         this.initialize();
     }
@@ -331,6 +332,7 @@ export class AssignmentManager {
         this.currentEditingId = assignment ? assignment.id : null;
         this.questions = assignment ? (assignment.questions || []) : [];
         this.currentEditingQuestionId = null;
+        this.unsavedQuestionData = null;
         this.uploadedImages.clear();
 
         if (assignment) {
@@ -358,6 +360,7 @@ export class AssignmentManager {
         this.currentEditingId = null;
         this.currentEditingQuestionId = null;
         this.questions = [];
+        this.unsavedQuestionData = null;
         this.uploadedImages.clear();
         document.getElementById('assignmentForm').reset();
     }
@@ -378,6 +381,11 @@ export class AssignmentManager {
         if (this.currentEditingQuestionId) {
             setTimeout(() => {
                 this.fillQuestionForm();
+            }, 100);
+        } else if (this.unsavedQuestionData && this.unsavedQuestionData.type === questionType) {
+            // Если есть несохраненные данные для этого типа вопроса - восстанавливаем их
+            setTimeout(() => {
+                this.fillQuestionForm(this.unsavedQuestionData);
             }, 100);
         }
     }
@@ -769,6 +777,21 @@ export class AssignmentManager {
         }
     }
 
+    // Сохраняет текущий вопрос из формы (без добавления в список)
+    saveCurrentQuestionForm() {
+        const questionType = document.getElementById('questionType').value;
+        try {
+            const questionData = this.collectQuestionData(questionType);
+            if (questionData) {
+                this.unsavedQuestionData = questionData;
+                return true;
+            }
+        } catch (error) {
+            console.error('Ошибка сохранения формы вопроса:', error);
+        }
+        return false;
+    }
+
     collectQuestionData(type) {
         const questionText = document.querySelector('.question-text')?.value.trim();
         if (!questionText) {
@@ -933,6 +956,7 @@ export class AssignmentManager {
     }
 
     clearQuestionForm() {
+        this.unsavedQuestionData = null;
         const questionType = document.getElementById('questionType').value;
         this.renderQuestionForm(questionType);
         this.currentEditingQuestionId = null;
@@ -1228,7 +1252,18 @@ export class AssignmentManager {
     async handleAssignmentSubmit(e) {
         e.preventDefault();
 
-        if (this.questions.length === 0) {
+        // Сохраняем текущий вопрос из формы, если он заполнен
+        const hasUnsavedQuestion = this.saveCurrentQuestionForm();
+        if (hasUnsavedQuestion && !this.currentEditingQuestionId) {
+            // Если есть несохраненный вопрос и мы не в режиме редактирования, добавляем его
+            this.unsavedQuestionData.id = Date.now().toString();
+            this.questions.push(this.unsavedQuestionData);
+            this.unsavedQuestionData = null;
+            this.renderQuestionsList();
+            this.clearQuestionForm();
+        }
+
+        if (this.questions.length === 0 && !hasUnsavedQuestion) {
             this.showNotification('Добавьте хотя бы один вопрос', 'error');
             return;
         }
