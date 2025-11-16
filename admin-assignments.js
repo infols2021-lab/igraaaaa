@@ -9,7 +9,7 @@ export class AssignmentManager {
         this.assignments = [];
         this.materials = [];
         this.questions = [];
-        this.uploadedImages = new Map(); // Храним временные изображения
+        this.uploadedImages = new Map();
         
         this.initialize();
     }
@@ -101,6 +101,17 @@ export class AssignmentManager {
     }
 
     setupEventDelegation() {
+        // Клик по области загрузки для открытия диалога выбора файла
+        document.addEventListener('click', (e) => {
+            const uploadArea = e.target.closest('.upload-area-small');
+            if (uploadArea && !e.target.closest('.remove-uploaded-image')) {
+                const fileInput = uploadArea.querySelector('input[type="file"]');
+                if (fileInput) {
+                    fileInput.click();
+                }
+            }
+        });
+
         // Удаление изображений
         document.addEventListener('click', (e) => {
             if (e.target.closest('.remove-image')) {
@@ -111,7 +122,6 @@ export class AssignmentManager {
                 if (items.length > 1) {
                     item.remove();
                 } else {
-                    // Если последний элемент - сбрасываем его
                     this.resetUploadArea(item.querySelector('.upload-area-small'));
                 }
             }
@@ -209,7 +219,7 @@ export class AssignmentManager {
         // Загрузка изображений
         document.addEventListener('change', (e) => {
             if (e.target.type === 'file' && e.target.closest('.upload-area-small')) {
-                this.handleImageUpload(e, e.target.closest('.upload-area-small'));
+                this.handleImageUpload(e);
             }
         });
 
@@ -235,7 +245,7 @@ export class AssignmentManager {
                 
                 const files = e.dataTransfer.files;
                 if (files.length > 0) {
-                    this.handleImageFile(files[0], area);
+                    this.handleImageUpload({ target: { files } }, area);
                 }
             }
         });
@@ -366,7 +376,9 @@ export class AssignmentManager {
 
         // Если редактируем вопрос - заполняем форму
         if (this.currentEditingQuestionId) {
-            this.fillQuestionForm();
+            setTimeout(() => {
+                this.fillQuestionForm();
+            }, 100);
         }
     }
 
@@ -439,7 +451,8 @@ export class AssignmentManager {
                                 <option value="end">Конец</option>
                             </select>
                             <div class="upload-area-small">
-                                <i class="fas fa-image"></i>
+                                <i class="fas fa-plus"></i>
+                                <span>Добавить картинку</span>
                                 <input type="file" accept="image/*" class="hidden">
                             </div>
                             <button type="button" class="btn btn-danger btn-small remove-word">
@@ -471,7 +484,8 @@ export class AssignmentManager {
                             <input type="text" class="input-field word-input" placeholder="Слово" required>
                             <input type="text" class="input-field pattern-input" placeholder="Схема (например: _ _ _)" required>
                             <div class="upload-area-small">
-                                <i class="fas fa-image"></i>
+                                <i class="fas fa-plus"></i>
+                                <span>Добавить картинку</span>
                                 <input type="file" accept="image/*" class="hidden">
                             </div>
                             <button type="button" class="btn btn-danger btn-small remove-syllable">
@@ -503,7 +517,8 @@ export class AssignmentManager {
                         <div class="category-item">
                             <input type="text" class="input-field item-input" placeholder="Слово или описание" required>
                             <div class="upload-area-small">
-                                <i class="fas fa-image"></i>
+                                <i class="fas fa-plus"></i>
+                                <span>Добавить картинку</span>
                                 <input type="file" accept="image/*" class="hidden">
                             </div>
                             <button type="button" class="btn btn-danger btn-small remove-item">
@@ -523,7 +538,8 @@ export class AssignmentManager {
                         <div class="category-item">
                             <input type="text" class="input-field item-input" placeholder="Слово или описание" required>
                             <div class="upload-area-small">
-                                <i class="fas fa-image"></i>
+                                <i class="fas fa-plus"></i>
+                                <span>Добавить картинку</span>
                                 <input type="file" accept="image/*" class="hidden">
                             </div>
                             <button type="button" class="btn btn-danger btn-small remove-item">
@@ -574,7 +590,8 @@ export class AssignmentManager {
                 <option value="end">Конец</option>
             </select>
             <div class="upload-area-small">
-                <i class="fas fa-image"></i>
+                <i class="fas fa-plus"></i>
+                <span>Добавить картинку</span>
                 <input type="file" accept="image/*" class="hidden">
             </div>
             <button type="button" class="btn btn-danger btn-small remove-word">
@@ -592,7 +609,8 @@ export class AssignmentManager {
             <input type="text" class="input-field word-input" placeholder="Слово" required>
             <input type="text" class="input-field pattern-input" placeholder="Схема (например: _ _ _)" required>
             <div class="upload-area-small">
-                <i class="fas fa-image"></i>
+                <i class="fas fa-plus"></i>
+                <span>Добавить картинку</span>
                 <input type="file" accept="image/*" class="hidden">
             </div>
             <button type="button" class="btn btn-danger btn-small remove-syllable">
@@ -609,7 +627,8 @@ export class AssignmentManager {
         newItem.innerHTML = `
             <input type="text" class="input-field item-input" placeholder="Слово или описание" required>
             <div class="upload-area-small">
-                <i class="fas fa-image"></i>
+                <i class="fas fa-plus"></i>
+                <span>Добавить картинку</span>
                 <input type="file" accept="image/*" class="hidden">
             </div>
             <button type="button" class="btn btn-danger btn-small remove-item">
@@ -625,13 +644,14 @@ export class AssignmentManager {
             <span>Добавить картинку</span>
             <input type="file" accept="image/*" class="hidden">
         `;
-        // Удаляем файл из input
         area.querySelector('input[type="file"]').value = '';
     }
 
-    async handleImageUpload(event, area) {
+    async handleImageUpload(event) {
         const file = event.target.files[0];
-        if (file) {
+        const area = event.target.closest('.upload-area-small');
+        
+        if (file && area) {
             await this.handleImageFile(file, area);
         }
     }
@@ -648,30 +668,49 @@ export class AssignmentManager {
         }
 
         try {
-            const imageId = 'img_' + Date.now();
-            const imageUrl = await this.uploadImageToStorage(file, imageId);
+            // Показываем превью сразу
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                area.innerHTML = `
+                    <div class="upload-loading">
+                        <div class="spinner"></div>
+                        <p>Загрузка...</p>
+                    </div>
+                `;
+            };
+            reader.readAsDataURL(file);
+
+            // Загружаем в Supabase Storage
+            const imageUrl = await this.uploadImageToStorage(file);
             
             if (imageUrl) {
-                this.uploadedImages.set(area, { file, imageUrl, imageId });
                 area.innerHTML = `
                     <img src="${imageUrl}" alt="Превью">
                     <button type="button" class="btn btn-danger btn-small remove-uploaded-image">
                         <i class="fas fa-times"></i>
                     </button>
                 `;
+                this.showNotification('Изображение загружено!', 'success');
+            } else {
+                this.resetUploadArea(area);
+                this.showNotification('Ошибка загрузки изображения', 'error');
             }
+            
         } catch (error) {
+            this.resetUploadArea(area);
             this.showNotification('Ошибка загрузки изображения', 'error');
             console.error('Ошибка загрузки:', error);
         }
     }
 
-    async uploadImageToStorage(file, imageId) {
+    async uploadImageToStorage(file) {
         try {
+            // Генерируем уникальное имя файла
             const fileExt = file.name.split('.').pop();
-            const fileName = `${imageId}.${fileExt}`;
-            const filePath = `assignments/temp/${fileName}`;
+            const fileName = `${Math.random().toString(36).substring(2)}_${Date.now()}.${fileExt}`;
+            const filePath = `assignments/${fileName}`;
 
+            // Загружаем файл в Supabase Storage
             const { data, error } = await supabase.storage
                 .from('materials')
                 .upload(filePath, file, {
@@ -679,8 +718,12 @@ export class AssignmentManager {
                     upsert: false
                 });
 
-            if (error) throw error;
+            if (error) {
+                console.error('Ошибка загрузки:', error);
+                throw new Error('Не удалось загрузить изображение');
+            }
 
+            // Получаем публичный URL
             const { data: { publicUrl } } = supabase.storage
                 .from('materials')
                 .getPublicUrl(filePath);
@@ -958,7 +1001,6 @@ export class AssignmentManager {
         this.renderQuestionsList();
         this.showNotification('Вопрос удален', 'success');
         
-        // Если удаляли редактируемый вопрос - сбрасываем форму
         if (this.currentEditingQuestionId === questionId) {
             this.clearQuestionForm();
         }
@@ -972,10 +1014,9 @@ export class AssignmentManager {
         if (question) {
             document.getElementById('questionType').value = question.type;
             this.renderQuestionForm(question.type);
-            // Небольшая задержка для гарантии отрисовки формы
             setTimeout(() => {
                 this.fillQuestionForm(question);
-            }, 50);
+            }, 100);
         }
     }
 
@@ -983,7 +1024,6 @@ export class AssignmentManager {
         const targetQuestion = question || this.questions.find(q => q.id === this.currentEditingQuestionId);
         if (!targetQuestion) return;
 
-        // Заполняем основной текст вопроса
         const questionText = document.querySelector('.question-text');
         if (questionText) {
             questionText.value = targetQuestion.question;
@@ -1006,10 +1046,8 @@ export class AssignmentManager {
     }
 
     fillType1Form(question) {
-        // Очищаем текущие картинки
         document.querySelectorAll('.image-upload-item').forEach(item => item.remove());
 
-        // Заполняем правильные картинки
         if (question.correctImages && question.correctImages.length > 0) {
             question.correctImages.forEach((imageSrc, index) => {
                 if (index === 0) {
@@ -1037,7 +1075,6 @@ export class AssignmentManager {
             this.addImageUploadItem(true);
         }
 
-        // Заполняем неправильные картинки
         if (question.incorrectImages && question.incorrectImages.length > 0) {
             question.incorrectImages.forEach((imageSrc, index) => {
                 if (index === 0) {
@@ -1067,10 +1104,8 @@ export class AssignmentManager {
     }
 
     fillType2Form(question) {
-        // Очищаем текущие слова
         document.querySelectorAll('.word-item').forEach(item => item.remove());
 
-        // Заполняем слова
         if (question.words && question.words.length > 0) {
             question.words.forEach((wordData, index) => {
                 if (index === 0) {
@@ -1107,10 +1142,8 @@ export class AssignmentManager {
     }
 
     fillType3Form(question) {
-        // Очищаем текущие слоги
         document.querySelectorAll('.syllable-item').forEach(item => item.remove());
 
-        // Заполняем слоги
         if (question.syllables && question.syllables.length > 0) {
             question.syllables.forEach((syllableData, index) => {
                 if (index === 0) {
@@ -1147,11 +1180,9 @@ export class AssignmentManager {
     }
 
     fillType4Form(question) {
-        // Заполняем категории
         document.querySelector('.category1-input').value = question.categories?.[0]?.name || '';
         document.querySelector('.category2-input').value = question.categories?.[1]?.name || '';
 
-        // Заполняем элементы категорий
         this.fillCategoryItems(1, question.categories?.[0]?.items || []);
         this.fillCategoryItems(2, question.categories?.[1]?.items || []);
     }
@@ -1160,10 +1191,8 @@ export class AssignmentManager {
         const container = document.querySelector(`[data-category="${categoryNumber}"]`);
         if (!container) return;
 
-        // Очищаем контейнер
         container.innerHTML = '';
 
-        // Добавляем элементы
         if (items.length > 0) {
             items.forEach((itemData, index) => {
                 this.addCategoryItem(categoryNumber);
@@ -1199,7 +1228,6 @@ export class AssignmentManager {
     async handleAssignmentSubmit(e) {
         e.preventDefault();
 
-        // Проверяем наличие вопросов
         if (this.questions.length === 0) {
             this.showNotification('Добавьте хотя бы один вопрос', 'error');
             return;
@@ -1227,7 +1255,6 @@ export class AssignmentManager {
         try {
             let result;
             if (this.currentEditingId) {
-                // Обновление существующего задания
                 const { error } = await supabase
                     .from('assignments')
                     .update(formData)
@@ -1236,7 +1263,6 @@ export class AssignmentManager {
                 if (error) throw error;
                 this.showNotification('Задание обновлено!', 'success');
             } else {
-                // Создание нового задания
                 const { data, error } = await supabase
                     .from('assignments')
                     .insert([formData])
@@ -1278,7 +1304,6 @@ export class AssignmentManager {
     }
 
     showNotification(message, type = 'info') {
-        // Удаляем существующие уведомления
         document.querySelectorAll('.notification').forEach(n => n.remove());
 
         const notification = document.createElement('div');
@@ -1313,7 +1338,6 @@ export class AssignmentManager {
     }
 }
 
-// Инициализация когда DOM загружен
 document.addEventListener('DOMContentLoaded', () => {
     window.assignmentManager = new AssignmentManager();
 });
