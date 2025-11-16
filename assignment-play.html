@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Выполнение задания - Учимся играя!</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <header class="header">
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">
+                    <span class="logo-icon">🎓</span>
+                    <h1>Учимся играя!</h1>
+                </div>
+                <button id="backBtn" class="btn btn-secondary btn-small">
+                    <i class="fas fa-arrow-left"></i>
+                    Назад к заданиям
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="main">
+        <div class="container">
+            <div class="assignment-play-header">
+                <h2 id="assignmentTitle">Название задания</h2>
+                <p id="assignmentDescription">Описание задания</p>
+                <div class="progress-info">
+                    Вопрос <span id="currentQuestion">1</span> из <span id="totalQuestions">0</span>
+                </div>
+            </div>
+
+            <div class="question-container" id="questionContainer">
+                <div class="loading-spinner">
+                    <div class="spinner"></div>
+                    <p>Загружаем задание...</p>
+                </div>
+            </div>
+
+            <div class="navigation-actions">
+                <button id="prevBtn" class="btn btn-secondary" disabled>
+                    <i class="fas fa-arrow-left"></i>
+                    Назад
+                </button>
+                <button id="nextBtn" class="btn btn-primary">
+                    Вперед
+                    <i class="fas fa-arrow-right"></i>
+                </button>
+                <button id="checkBtn" class="btn btn-accent hidden">
+                    Проверить
+                </button>
+                <button id="finishBtn" class="btn btn-success hidden">
+                    Завершить
+                </button>
+            </div>
+        </div>
+    </main>
+
+    <!-- Модальное окно с результатами -->
+    <div id="resultModal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Результаты выполнения</h3>
+                <button class="close-btn" id="closeResult">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div id="resultContent"></div>
+            </div>
+            <div class="form-actions">
+                <button id="tryAgain" class="btn btn-primary">
+                    <i class="fas fa-redo"></i>
+                    Пройти еще раз
+                </button>
+                <button id="backToAssignments" class="btn btn-secondary">
+                    <i class="fas fa-list"></i>
+                    К списку заданий
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module" src="assignment-play.js"></script>
+</body>
+</html>

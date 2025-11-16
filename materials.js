@@ -66,36 +66,36 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function createMaterialCard(material, index) {
-        const card = document.createElement('div');
-        card.className = 'material-card';
-        card.style.animationDelay = `${index * 0.1}s`;
-        
-        // Определяем иконку по умолчанию на основе названия
-        const defaultIcon = getMaterialIcon(material.title);
-        
-        card.innerHTML = `
-            <div class="material-image">
-                ${material.image_url 
-                    ? `<img src="${material.image_url}" alt="${material.title}" onerror="this.style.display='none'; this.parentElement.innerHTML='${defaultIcon}'">`
-                    : defaultIcon
-                }
+    const card = document.createElement('div');
+    card.className = 'material-card';
+    card.style.animationDelay = `${index * 0.1}s`;
+    
+    // Определяем иконку по умолчанию на основе названия
+    const defaultIcon = getMaterialIcon(material.title);
+    
+    card.innerHTML = `
+        <div class="material-image">
+            ${material.image_url 
+                ? `<img src="${material.image_url}" alt="${material.title}" onerror="this.style.display='none'; this.parentElement.innerHTML='${defaultIcon}'">`
+                : defaultIcon
+            }
+        </div>
+        <div class="material-content">
+            <h3 class="material-title">${material.title}</h3>
+            <div class="material-assignments">
+                <i class="fas fa-tasks"></i>
+                <span>${material.assignments?.length || 0} заданий</span>
             </div>
-            <div class="material-content">
-                <h3 class="material-title">${material.title}</h3>
-                <div class="material-assignments">
-                    <i class="fas fa-tasks"></i>
-                    <span>${material.assignments?.length || 0} заданий</span>
-                </div>
-            </div>
-        `;
+        </div>
+    `;
 
-        // Добавляем обработчик клика
-        card.addEventListener('click', function() {
-            showComingSoon(material.title);
-        });
+    // Добавляем обработчик клика - переход к заданиям материала
+    card.addEventListener('click', function() {
+        window.location.href = `assignments.html?material_id=${material.id}`;
+    });
 
-        return card;
-    }
+    return card;
+}
 
     function getMaterialIcon(title) {
         const lowerTitle = title.toLowerCase();
