@@ -1207,15 +1207,16 @@ textarea.input-field {
     padding: 16px;
     margin-bottom: 12px;
     border-left: 3px solid var(--accent-2);
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
 }
 
 .question-header {
     display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 8px;
-    flex-wrap: wrap;
-    gap: 8px;
+    flex-direction: column;
+    gap: 5px;
+    flex: 1;
 }
 
 .question-type {
@@ -1239,7 +1240,7 @@ textarea.input-field {
     justify-content: flex-end;
 }
 
-/* Стили для форм вопросов */
+/* ===== ВАЖНО: Исправленные стили для форм вопросов ===== */
 .question-form {
     background: var(--bg);
     border-radius: var(--radius-sm);
@@ -1255,6 +1256,7 @@ textarea.input-field {
     padding-bottom: 8px;
 }
 
+/* Сетка для изображений в типе 1 */
 .images-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
@@ -1277,12 +1279,13 @@ textarea.input-field {
     cursor: pointer;
     transition: all 0.3s ease;
     background: var(--bg-card);
-    height: 100px;
+    height: 120px;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
     gap: 8px;
+    position: relative;
 }
 
 .upload-area-small:hover {
@@ -1312,6 +1315,56 @@ textarea.input-field {
     color: var(--text-light);
 }
 
+/* Кнопки удаления для элементов форм */
+.remove-image,
+.remove-word,
+.remove-syllable,
+.remove-item {
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: var(--error);
+    color: white;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    cursor: pointer;
+    z-index: 2;
+    transition: all 0.3s ease;
+}
+
+.remove-image:hover,
+.remove-word:hover,
+.remove-syllable:hover,
+.remove-item:hover {
+    background: #dc2626;
+    transform: scale(1.1);
+}
+
+.remove-uploaded-image {
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: var(--error);
+    color: white;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    cursor: pointer;
+    z-index: 2;
+}
+
+/* Стили для динамических элементов форм */
 .words-list,
 .syllables-list,
 .category-items {
@@ -1328,6 +1381,11 @@ textarea.input-field {
     gap: 12px;
     align-items: center;
     flex-wrap: wrap;
+    padding: 12px;
+    background: var(--bg-card);
+    border-radius: var(--radius-sm);
+    border: 1px solid #e2e8f0;
+    position: relative;
 }
 
 .word-item .input-field,
@@ -1344,6 +1402,44 @@ textarea.input-field {
     background: var(--bg-card);
     color: var(--text);
     min-width: 120px;
+}
+
+/* Кнопки добавления элементов */
+.add-image-btn,
+.add-word-btn,
+.add-syllable-btn,
+.add-category-item {
+    width: auto !important;
+    margin: 0 0 10px 0 !important;
+    align-self: flex-start;
+}
+
+/* ===== Улучшенные стили для админки ===== */
+.correct-images,
+.incorrect-images {
+    min-height: 140px;
+    border: 2px dashed #e2e8f0;
+    border-radius: var(--radius-sm);
+    padding: 15px;
+    margin-bottom: 10px;
+    background: var(--bg);
+}
+
+.correct-images.drag-over,
+.incorrect-images.drag-over {
+    border-color: var(--primary);
+    background: var(--primary-light);
+}
+
+/* Стили для превью изображений в формах */
+.upload-area-small.has-image {
+    padding: 0;
+    border-style: solid;
+    border-color: var(--success);
+}
+
+.upload-area-small.has-image img {
+    border-radius: 6px;
 }
 
 /* ===== Assignment Play Styles ===== */
@@ -2141,6 +2237,16 @@ textarea.input-field {
     .images-selection {
         grid-template-columns: repeat(2, 1fr);
     }
+    
+    .question-item {
+        flex-direction: column;
+        gap: 12px;
+    }
+    
+    .question-actions {
+        justify-content: center;
+        width: 100%;
+    }
 }
 
 @media (max-width: 480px) {
@@ -2401,35 +2507,6 @@ body {
     margin-bottom: 0;
 }
 
-.add-image-btn,
-.add-word-btn,
-.add-syllable-btn,
-.add-category-item {
-    width: auto !important;
-    margin: 0 !important;
-}
-
-.remove-image,
-.remove-word,
-.remove-syllable,
-.remove-item {
-    position: absolute;
-    top: -8px;
-    right: -8px;
-    width: 24px;
-    height: 24px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 12px;
-    z-index: 2;
-}
-
-.image-upload-item {
-    position: relative;
-}
-
 /* Улучшения для удаления загруженных изображений */
 .remove-uploaded-image {
     position: absolute;
@@ -2482,8 +2559,8 @@ body {
     background: var(--error);
     color: white;
 }
-/* Добавь эти стили в конец файла styles.css */
 
+/* ===== КРИТИЧЕСКИЕ ИСПРАВЛЕНИЯ ДЛЯ АДМИНКИ ===== */
 .images-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
@@ -2639,7 +2716,7 @@ body {
     }
 }
 
-/* Адаптивность */
+/* Адаптивность для админки */
 @media (max-width: 768px) {
     .word-item,
     .syllable-item,
@@ -2655,5 +2732,84 @@ body {
     .upload-area-small {
         width: 100px;
         height: 100px;
+    }
+}
+
+/* Фиксы для z-index в модальных окнах */
+.modal {
+    z-index: 10000;
+}
+
+.notification {
+    z-index: 10001;
+}
+
+/* Улучшение визуальной иерархии */
+.form-group:last-of-type {
+    margin-bottom: 0;
+}
+
+.question-form .form-group:last-child {
+    margin-bottom: 0;
+}
+
+/* Стили для успешных операций */
+.success-border {
+    border-color: var(--success) !important;
+}
+
+.warning-border {
+    border-color: var(--warning) !important;
+}
+
+.error-border {
+    border-color: var(--error) !important;
+}
+
+/* Улучшение скроллбаров */
+.words-list::-webkit-scrollbar,
+.syllables-list::-webkit-scrollbar,
+.category-items::-webkit-scrollbar {
+    width: 6px;
+}
+
+.words-list::-webkit-scrollbar-track,
+.syllables-list::-webkit-scrollbar-track,
+.category-items::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 3px;
+}
+
+.words-list::-webkit-scrollbar-thumb,
+.syllables-list::-webkit-scrollbar-thumb,
+.category-items::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: 3px;
+}
+
+.words-list::-webkit-scrollbar-thumb:hover,
+.syllables-list::-webkit-scrollbar-thumb:hover,
+.category-items::-webkit-scrollbar-thumb:hover {
+    background: #a8a8a8;
+}
+
+/* Улучшение для очень маленьких экранов */
+@media (max-width: 360px) {
+    .images-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .upload-area-small {
+        height: 100px;
+    }
+    
+    .word-item,
+    .syllable-item,
+    .category-item {
+        padding: 8px;
+    }
+    
+    .question-form {
+        padding: 15px;
     }
 }
