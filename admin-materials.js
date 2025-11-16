@@ -13,12 +13,22 @@ document.addEventListener('DOMContentLoaded', function() {
     const backToSite = document.getElementById('backToSite');
     const logoutBtn = document.getElementById('logoutBtn');
     
+    // Элементы загрузки изображений
+    const uploadArea = document.getElementById('uploadArea');
+    const imageUpload = document.getElementById('imageUpload');
+    const imagePreview = document.getElementById('imagePreview');
+    const previewImage = document.getElementById('previewImage');
+    const removeImage = document.getElementById('removeImage');
+    const currentImageUrl = document.getElementById('currentImageUrl');
+    
     // Табы
     const tabBtns = document.querySelectorAll('.tab-btn');
     const tabContents = document.querySelectorAll('.tab-content');
 
     let currentEditingId = null;
     let materials = [];
+    let selectedFile = null;
+    let uploadInProgress = false;
 
     // Инициализация
     checkAdminAuth();
@@ -60,6 +70,9 @@ document.addEventListener('DOMContentLoaded', function() {
         cancelBtn.addEventListener('click', () => closeMaterialModal());
         materialForm.addEventListener('submit', handleMaterialSubmit);
 
+        // Загрузка изображений
+        setupImageUpload();
+
         // Кнопки навигации
         backToSite.addEventListener('click', () => {
             window.location.href = 'materials.html';
@@ -76,6 +89,161 @@ document.addEventListener('DOMContentLoaded', function() {
                 closeMaterialModal();
             }
         });
+    }
+
+    function setupImageUpload() {
+        // Клик по области загрузки
+        uploadArea.addEventListener('click', () => {
+            imageUpload.click();
+        });
+
+        // Выбор файла через input
+        imageUpload.addEventListener('change', handleFileSelect);
+
+        // Drag and drop события
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.classList.add('drag-over');
+        });
+
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.classList.remove('drag-over');
+        });
+
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('drag-over');
+            
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                handleFile(files[0]);
+            }
+        });
+
+        // Удаление изображения
+        removeImage.addEventListener('click', (e) => {
+            e.preventDefault();
+            resetImageSelection();
+        });
+    }
+
+    function handleFileSelect(e) {
+        const file = e.target.files[0];
+        if (file) {
+            handleFile(file);
+        }
+    }
+
+    function handleFile(file) {
+        // Проверка типа файла
+        if (!file.type.startsWith('image/')) {
+            showNotification('Пожалуйста, выберите файл изображения', 'error');
+            return;
+        }
+
+        // Проверка размера файла (2MB)
+        if (file.size > 2 * 1024 * 1024) {
+            showNotification('Размер файла не должен превышать 2MB', 'error');
+            return;
+        }
+
+        selectedFile = file;
+        showImagePreview(file);
+    }
+
+    function showImagePreview(file) {
+        const reader = new FileReader();
+        
+        reader.onload = (e) => {
+            previewImage.src = e.target.result;
+            imagePreview.classList.remove('hidden');
+            uploadArea.classList.add('hidden');
+        };
+        
+        reader.readAsDataURL(file);
+    }
+
+    function resetImageSelection() {
+        selectedFile = null;
+        currentImageUrl.value = '';
+        imageUpload.value = '';
+        imagePreview.classList.add('hidden');
+        uploadArea.classList.remove('hidden');
+    }
+
+    async function uploadImageToStorage(materialId = null) {
+        if (!selectedFile) {
+            return currentImageUrl.value || null;
+        }
+
+        uploadInProgress = true;
+        setSaveButtonLoading(true);
+
+        try {
+            // Генерируем уникальное имя файла
+            const fileExt = selectedFile.name.split('.').pop();
+            const fileName = `${Math.random().toString(36).substring(2)}_${Date.now()}.${fileExt}`;
+            const filePath = materialId ? `${materialId}/${fileName}` : `temp/${fileName}`;
+
+            // Загружаем файл в Supabase Storage
+            const { data, error } = await supabase.storage
+                .from('materials')
+                .upload(filePath, selectedFile, {
+                    cacheControl: '3600',
+                    upsert: false
+                });
+
+            if (error) {
+                console.error('Ошибка загрузки:', error);
+                throw new Error('Не удалось загрузить изображение');
+            }
+
+            // Получаем публичный URL
+            const { data: { publicUrl } } = supabase.storage
+                .from('materials')
+                .getPublicUrl(filePath);
+
+            uploadInProgress = false;
+            setSaveButtonLoading(false);
+            
+            return publicUrl;
+
+        } catch (error) {
+            uploadInProgress = false;
+            setSaveButtonLoading(false);
+            throw error;
+        }
+    }
+
+    async function deleteImageFromStorage(imageUrl) {
+        if (!imageUrl) return;
+
+        try {
+            // Извлекаем путь к файлу из URL
+            const urlParts = imageUrl.split('/');
+            const filePath = urlParts.slice(urlParts.indexOf('materials') + 1).join('/');
+
+            const { error } = await supabase.storage
+                .from('materials')
+                .remove([filePath]);
+
+            if (error) {
+                console.error('Ошибка удаления изображения:', error);
+            }
+        } catch (error) {
+            console.error('Ошибка удаления изображения:', error);
+        }
+    }
+
+    function setSaveButtonLoading(isLoading, text = 'Сохранение...') {
+        const saveBtn = document.getElementById('saveMaterialBtn');
+        if (isLoading) {
+            saveBtn.disabled = true;
+            saveBtn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> ${text}`;
+        } else {
+            saveBtn.disabled = false;
+            saveBtn.innerHTML = `<i class="fas fa-save"></i> Сохранить материал`;
+        }
     }
 
     function switchTab(tabId) {
@@ -138,6 +306,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     <div class="material-meta">
                         <span><i class="fas fa-tasks"></i> ${material.assignments?.length || 0} заданий</span>
                         <span><i class="fas fa-sort"></i> Порядок: ${material.display_order || 0}</span>
+                        ${material.image_url ? '<span><i class="fas fa-image"></i> Есть изображение</span>' : ''}
                     </div>
                 </div>
                 <div class="material-actions">
@@ -170,13 +339,23 @@ document.addEventListener('DOMContentLoaded', function() {
             modalTitle.textContent = 'Редактировать материал';
             document.getElementById('materialId').value = material.id;
             document.getElementById('materialTitle').value = material.title;
-            document.getElementById('materialImage').value = material.image_url || '';
             document.getElementById('displayOrder').value = material.display_order || 0;
+            
+            // Обработка изображения
+            if (material.image_url) {
+                currentImageUrl.value = material.image_url;
+                previewImage.src = material.image_url;
+                imagePreview.classList.remove('hidden');
+                uploadArea.classList.add('hidden');
+            } else {
+                resetImageSelection();
+            }
         } else {
             // Создание нового
             modalTitle.textContent = 'Добавить материал';
             materialForm.reset();
             document.getElementById('displayOrder').value = materials.length;
+            resetImageSelection();
         }
 
         materialModal.classList.remove('hidden');
@@ -185,28 +364,41 @@ document.addEventListener('DOMContentLoaded', function() {
     function closeMaterialModal() {
         materialModal.classList.add('hidden');
         currentEditingId = null;
+        selectedFile = null;
         materialForm.reset();
+        resetImageSelection();
     }
 
     async function handleMaterialSubmit(e) {
         e.preventDefault();
         
+        if (uploadInProgress) {
+            showNotification('Дождитесь завершения загрузки изображения', 'warning');
+            return;
+        }
+
         const saveBtn = document.getElementById('saveMaterialBtn');
         const originalText = saveBtn.innerHTML;
         
         try {
-            saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Сохранение...';
-            saveBtn.disabled = true;
+            setSaveButtonLoading(true, 'Загрузка изображения...');
 
             const formData = {
                 title: document.getElementById('materialTitle').value.trim(),
-                image_url: document.getElementById('materialImage').value.trim() || null,
                 display_order: parseInt(document.getElementById('displayOrder').value) || 0
             };
 
             if (!formData.title) {
                 throw new Error('Название материала обязательно');
             }
+
+            // Загружаем изображение если есть
+            let imageUrl = currentImageUrl.value;
+            if (selectedFile) {
+                imageUrl = await uploadImageToStorage(currentEditingId);
+            }
+
+            formData.image_url = imageUrl || null;
 
             let result;
             if (currentEditingId) {
@@ -240,8 +432,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 'error'
             );
         } finally {
-            saveBtn.innerHTML = originalText;
-            saveBtn.disabled = false;
+            setSaveButtonLoading(false);
         }
     }
 
@@ -259,6 +450,12 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 
         try {
+            // Находим материал для удаления изображения
+            const material = materials.find(m => m.id === materialId);
+            if (material && material.image_url) {
+                await deleteImageFromStorage(material.image_url);
+            }
+
             const { error } = await supabase
                 .from('materials')
                 .delete()
@@ -282,11 +479,11 @@ document.addEventListener('DOMContentLoaded', function() {
             position: fixed;
             top: 20px;
             right: 20px;
-            background: ${type === 'success' ? 'var(--success)' : type === 'error' ? 'var(--error)' : 'var(--primary)'};
+            background: ${type === 'success' ? 'var(--success)' : type === 'error' ? 'var(--error)' : type === 'warning' ? 'var(--warning)' : 'var(--info)'};
             color: white;
             padding: 16px 20px;
-            border-radius: 12px;
-            box-shadow: var(--shadow);
+            border-radius: var(--radius-sm);
+            box-shadow: var(--shadow-lg);
             z-index: 1000;
             animation: slideInRight 0.3s ease;
             max-width: 300px;
@@ -294,7 +491,7 @@ document.addEventListener('DOMContentLoaded', function() {
         
         notification.innerHTML = `
             <div style="display: flex; align-items: center; gap: 10px;">
-                <i class="fas fa-${type === 'success' ? 'check' : type === 'error' ? 'exclamation-triangle' : 'info'}"></i>
+                <i class="fas fa-${type === 'success' ? 'check' : type === 'error' ? 'exclamation-triangle' : type === 'warning' ? 'exclamation' : 'info'}"></i>
                 <span>${message}</span>
             </div>
         `;

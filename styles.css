@@ -1,4 +1,4 @@
-/* styles.css - Полная версия с центрированием и новой цветовой схемой */
+/* styles.css - Полная версия с drag-and-drop */
 
 /* ===== CSS Variables & Reset ===== */
 * {
@@ -19,10 +19,10 @@
     --secondary-light: #b794f4;
     
     /* Акцентные цвета */
-    --accent-1: #f093fb;  /* Фиолетовый */
-    --accent-2: #4ade80;  /* Зеленый */
-    --accent-3: #fbbf24;  /* Желтый */
-    --accent-4: #f87171;  /* Красный */
+    --accent-1: #f093fb;
+    --accent-2: #4ade80;
+    --accent-3: #fbbf24;
+    --accent-4: #f87171;
     
     /* Системные цвета */
     --success: #10b981;
@@ -63,7 +63,6 @@ body {
     padding: 0 20px;
 }
 
-/* Центрирующий контейнер для форм */
 .center-container {
     display: flex;
     align-items: center;
@@ -101,7 +100,6 @@ body {
     transform: translateY(0);
 }
 
-/* Основная кнопка - синяя */
 .btn-primary {
     background: linear-gradient(135deg, var(--primary), var(--secondary));
     color: white;
@@ -111,7 +109,6 @@ body {
     background: linear-gradient(135deg, var(--primary-dark), var(--secondary-dark));
 }
 
-/* Вторичная кнопка - зеленая */
 .btn-secondary {
     background: linear-gradient(135deg, var(--accent-2), #22c55e);
     color: white;
@@ -122,7 +119,6 @@ body {
     background: linear-gradient(135deg, #22c55e, #16a34a);
 }
 
-/* Акцентная кнопка - фиолетовая */
 .btn-accent {
     background: linear-gradient(135deg, var(--accent-1), #c084fc);
     color: white;
@@ -132,7 +128,6 @@ body {
     background: linear-gradient(135deg, #c084fc, #a855f7);
 }
 
-/* Предупреждающая кнопка - желтая */
 .btn-warning {
     background: linear-gradient(135deg, var(--accent-3), #f59e0b);
     color: white;
@@ -142,7 +137,6 @@ body {
     background: linear-gradient(135deg, #f59e0b, #d97706);
 }
 
-/* Опасная кнопка - красная */
 .btn-danger {
     background: linear-gradient(135deg, var(--accent-4), #ef4444);
     color: white;
@@ -152,7 +146,6 @@ body {
     background: linear-gradient(135deg, #ef4444, #dc2626);
 }
 
-/* Прозрачная кнопка */
 .btn-outline {
     background: transparent;
     color: var(--primary);
@@ -164,7 +157,6 @@ body {
     color: white;
 }
 
-/* Размеры кнопок */
 .btn-large {
     padding: 18px 28px;
     font-size: 18px;
@@ -204,6 +196,116 @@ body {
     outline: none;
     border-color: var(--primary);
     box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+/* ===== Drag & Drop Upload Area ===== */
+.upload-area {
+    border: 2px dashed #cbd5e0;
+    border-radius: var(--radius-sm);
+    padding: 40px 20px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    background: var(--bg);
+    position: relative;
+    overflow: hidden;
+}
+
+.upload-area:hover {
+    border-color: var(--primary);
+    background: var(--bg-hover);
+}
+
+.upload-area.drag-over {
+    border-color: var(--primary);
+    background: var(--primary-light);
+    transform: scale(1.02);
+}
+
+.upload-area.drag-over .upload-placeholder {
+    color: var(--primary);
+}
+
+.upload-placeholder {
+    color: var(--text-light);
+    pointer-events: none;
+}
+
+.upload-placeholder i {
+    font-size: 48px;
+    margin-bottom: 16px;
+    color: var(--text-lighter);
+}
+
+.upload-placeholder p {
+    font-size: 16px;
+    margin-bottom: 8px;
+    font-weight: 600;
+}
+
+.upload-hint {
+    font-size: 14px;
+    color: var(--text-lighter);
+}
+
+.upload-area input[type="file"] {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    cursor: pointer;
+}
+
+/* Image Preview */
+.image-preview {
+    margin-top: 20px;
+    animation: fadeIn 0.3s ease;
+}
+
+.preview-container {
+    text-align: center;
+}
+
+.preview-container img {
+    max-width: 100%;
+    max-height: 200px;
+    border-radius: var(--radius-sm);
+    box-shadow: var(--shadow);
+    margin-bottom: 16px;
+    border: 3px solid var(--bg-card);
+}
+
+/* Upload Progress */
+.upload-progress {
+    margin-top: 16px;
+    background: var(--bg);
+    border-radius: var(--radius-sm);
+    padding: 16px;
+    text-align: center;
+}
+
+.progress-bar {
+    width: 100%;
+    height: 8px;
+    background: #e2e8f0;
+    border-radius: 4px;
+    overflow: hidden;
+    margin-bottom: 8px;
+}
+
+.progress-fill {
+    height: 100%;
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    transition: width 0.3s ease;
+    border-radius: 4px;
+}
+
+.progress-text {
+    font-size: 14px;
+    color: var(--text-light);
+    font-weight: 600;
 }
 
 /* Утилиты */
@@ -461,12 +563,19 @@ body {
     justify-content: center;
     font-size: 64px;
     color: white;
+    position: relative;
+    overflow: hidden;
 }
 
 .material-image img {
     width: 100%;
     height: 100%;
     object-fit: cover;
+    transition: transform 0.3s ease;
+}
+
+.material-card:hover .material-image img {
+    transform: scale(1.05);
 }
 
 .material-content {
@@ -604,6 +713,7 @@ body {
     font-size: 32px;
     color: white;
     flex-shrink: 0;
+    overflow: hidden;
 }
 
 .material-preview img {
@@ -906,6 +1016,11 @@ body {
     }
 }
 
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.7; }
+}
+
 /* Анимация появления карточек */
 .material-card {
     animation: fadeInUp 0.6s ease forwards;
@@ -989,6 +1104,14 @@ body {
     .tab-btn {
         margin: 0;
     }
+    
+    .upload-area {
+        padding: 30px 15px;
+    }
+    
+    .upload-placeholder i {
+        font-size: 36px;
+    }
 }
 
 @media (max-width: 480px) {
@@ -1058,6 +1181,18 @@ body {
     .admin-material-card {
         padding: 16px;
     }
+    
+    .upload-area {
+        padding: 20px 10px;
+    }
+    
+    .upload-placeholder i {
+        font-size: 32px;
+    }
+    
+    .upload-placeholder p {
+        font-size: 14px;
+    }
 }
 
 /* Улучшение доступности */
@@ -1097,6 +1232,11 @@ body {
     .feature {
         background: var(--bg-hover);
     }
+    
+    .upload-area {
+        background: var(--bg-hover);
+        border-color: #4b5563;
+    }
 }
 
 /* Специфические улучшения UX */
@@ -1135,4 +1275,34 @@ body {
 .mx-auto {
     margin-left: auto;
     margin-right: auto;
+}
+
+/* Loading states */
+.uploading {
+    position: relative;
+}
+
+.uploading::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(255, 255, 255, 0.8);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: inherit;
+}
+
+.uploading::before {
+    content: 'Загрузка...';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 2;
+    font-weight: 600;
+    color: var(--primary);
 }

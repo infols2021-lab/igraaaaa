@@ -54,7 +54,6 @@
                 </div>
 
                 <div class="materials-list" id="materialsList">
-                    <!-- Список материалов будет здесь -->
                     <div class="loading-spinner">
                         <div class="spinner"></div>
                         <p>Загружаем материалы...</p>
@@ -90,18 +89,36 @@
             </div>
             <form id="materialForm" class="modal-form">
                 <input type="hidden" id="materialId">
+                <input type="hidden" id="currentImageUrl">
                 
                 <div class="form-group">
-                    <label for="materialTitle">Название материала</label>
+                    <label for="materialTitle">Название материала *</label>
                     <input type="text" id="materialTitle" class="input-field" required 
                            placeholder="Например: Математика для начинающих">
                 </div>
 
+                <!-- Область для drag-and-drop загрузки -->
                 <div class="form-group">
-                    <label for="materialImage">URL изображения (необязательно)</label>
-                    <input type="url" id="materialImage" class="input-field" 
-                           placeholder="https://example.com/image.jpg">
-                    <small>Можно оставить пустым - будет использована иконка по умолчанию</small>
+                    <label>Изображение материала</label>
+                    <div id="uploadArea" class="upload-area">
+                        <div class="upload-placeholder">
+                            <i class="fas fa-cloud-upload-alt"></i>
+                            <p>Перетащите изображение сюда или нажмите для выбора</p>
+                            <span class="upload-hint">PNG, JPG до 2MB</span>
+                        </div>
+                        <input type="file" id="imageUpload" accept="image/*" class="hidden">
+                    </div>
+                    
+                    <!-- Превью изображения -->
+                    <div id="imagePreview" class="image-preview hidden">
+                        <div class="preview-container">
+                            <img id="previewImage" src="" alt="Превью">
+                            <button type="button" id="removeImage" class="btn btn-danger btn-small">
+                                <i class="fas fa-trash"></i>
+                                Удалить
+                            </button>
+                        </div>
+                    </div>
                 </div>
 
                 <div class="form-group">
@@ -114,7 +131,7 @@
                     <button type="button" class="btn btn-secondary" id="cancelBtn">Отмена</button>
                     <button type="submit" class="btn btn-primary" id="saveMaterialBtn">
                         <i class="fas fa-save"></i>
-                        Сохранить
+                        Сохранить материал
                     </button>
                 </div>
             </form>
