@@ -1,4 +1,4 @@
-/* styles.css - Полная версия для приложения "Учимся играя!" */
+/* styles.css - Полная версия с центрированием и новой цветовой схемой */
 
 /* ===== CSS Variables & Reset ===== */
 * {
@@ -8,19 +8,43 @@
 }
 
 :root {
+    /* Основные цвета */
     --primary: #667eea;
     --primary-dark: #5a6fd8;
+    --primary-light: #a3bffa;
+    
+    /* Вторичные цвета */
     --secondary: #764ba2;
-    --accent: #f093fb;
-    --success: #4ade80;
-    --warning: #fbbf24;
-    --error: #f87171;
-    --text: #2d3748;
-    --text-light: #718096;
-    --bg: #f7fafc;
-    --card-bg: #ffffff;
+    --secondary-dark: #6b46c1;
+    --secondary-light: #b794f4;
+    
+    /* Акцентные цвета */
+    --accent-1: #f093fb;  /* Фиолетовый */
+    --accent-2: #4ade80;  /* Зеленый */
+    --accent-3: #fbbf24;  /* Желтый */
+    --accent-4: #f87171;  /* Красный */
+    
+    /* Системные цвета */
+    --success: #10b981;
+    --warning: #f59e0b;
+    --error: #ef4444;
+    --info: #3b82f6;
+    
+    /* Текстовые цвета */
+    --text: #1f2937;
+    --text-light: #6b7280;
+    --text-lighter: #9ca3af;
+    
+    /* Фоновые цвета */
+    --bg: #f8fafc;
+    --bg-card: #ffffff;
+    --bg-hover: #f1f5f9;
+    
+    /* Тени и скругления */
     --shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+    --shadow-lg: 0 20px 40px -10px rgba(0, 0, 0, 0.15);
     --radius: 16px;
+    --radius-sm: 12px;
 }
 
 body {
@@ -39,9 +63,19 @@ body {
     padding: 0 20px;
 }
 
+/* Центрирующий контейнер для форм */
+.center-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    padding: 20px;
+}
+
+/* Кнопки */
 .btn {
     border: none;
-    border-radius: 12px;
+    border-radius: var(--radius-sm);
     padding: 16px 24px;
     font-size: 16px;
     font-weight: 600;
@@ -55,50 +89,97 @@ body {
     text-decoration: none;
     width: 100%;
     margin-bottom: 16px;
+    text-align: center;
 }
 
 .btn:hover {
     transform: translateY(-2px);
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+    box-shadow: var(--shadow-lg);
 }
 
 .btn:active {
     transform: translateY(0);
 }
 
+/* Основная кнопка - синяя */
 .btn-primary {
     background: linear-gradient(135deg, var(--primary), var(--secondary));
     color: white;
 }
 
 .btn-primary:hover {
-    background: linear-gradient(135deg, var(--primary-dark), var(--secondary));
+    background: linear-gradient(135deg, var(--primary-dark), var(--secondary-dark));
 }
 
+/* Вторичная кнопка - зеленая */
 .btn-secondary {
+    background: linear-gradient(135deg, var(--accent-2), #22c55e);
+    color: white;
+    border: 2px solid transparent;
+}
+
+.btn-secondary:hover {
+    background: linear-gradient(135deg, #22c55e, #16a34a);
+}
+
+/* Акцентная кнопка - фиолетовая */
+.btn-accent {
+    background: linear-gradient(135deg, var(--accent-1), #c084fc);
+    color: white;
+}
+
+.btn-accent:hover {
+    background: linear-gradient(135deg, #c084fc, #a855f7);
+}
+
+/* Предупреждающая кнопка - желтая */
+.btn-warning {
+    background: linear-gradient(135deg, var(--accent-3), #f59e0b);
+    color: white;
+}
+
+.btn-warning:hover {
+    background: linear-gradient(135deg, #f59e0b, #d97706);
+}
+
+/* Опасная кнопка - красная */
+.btn-danger {
+    background: linear-gradient(135deg, var(--accent-4), #ef4444);
+    color: white;
+}
+
+.btn-danger:hover {
+    background: linear-gradient(135deg, #ef4444, #dc2626);
+}
+
+/* Прозрачная кнопка */
+.btn-outline {
     background: transparent;
     color: var(--primary);
     border: 2px solid var(--primary);
 }
 
-.btn-secondary:hover {
+.btn-outline:hover {
     background: var(--primary);
     color: white;
 }
 
+/* Размеры кнопок */
 .btn-large {
-    padding: 18px 24px;
+    padding: 18px 28px;
     font-size: 18px;
+    border-radius: var(--radius);
 }
 
 .btn-small {
     padding: 12px 20px;
     font-size: 14px;
+    border-radius: 12px;
 }
 
 .btn-icon {
     padding: 10px;
-    border-radius: 8px;
+    border-radius: 10px;
     border: none;
     cursor: pointer;
     transition: all 0.3s ease;
@@ -107,46 +188,36 @@ body {
     margin: 0;
 }
 
-.btn-edit {
-    background: var(--warning);
-    color: white;
-}
-
-.btn-edit:hover {
-    background: #f59e0b;
-}
-
-.btn-delete {
-    background: var(--error);
-    color: white;
-}
-
-.btn-delete:hover {
-    background: #ef4444;
-}
-
+/* Поля ввода */
 .input-field {
     width: 100%;
     padding: 14px 16px;
     border: 2px solid #e2e8f0;
-    border-radius: 12px;
+    border-radius: var(--radius-sm);
     font-size: 16px;
     font-family: inherit;
-    transition: border-color 0.3s ease;
+    transition: all 0.3s ease;
+    background: var(--bg-card);
 }
 
 .input-field:focus {
     outline: none;
     border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
 }
 
+/* Утилиты */
 .hidden {
-    display: none;
+    display: none !important;
 }
 
 .loading {
     opacity: 0.7;
     pointer-events: none;
+}
+
+.text-center {
+    text-align: center;
 }
 
 /* ===== Login Page Styles ===== */
@@ -159,14 +230,15 @@ body {
 }
 
 .login-card {
-    background: var(--card-bg);
+    background: var(--bg-card);
     border-radius: var(--radius);
     padding: 40px 30px;
-    box-shadow: var(--shadow);
+    box-shadow: var(--shadow-lg);
     text-align: center;
     backdrop-filter: blur(10px);
     width: 100%;
     max-width: 440px;
+    margin: 0 auto;
 }
 
 .logo {
@@ -174,13 +246,14 @@ body {
 }
 
 .logo-icon {
-    font-size: 48px;
-    margin-bottom: 12px;
+    font-size: 64px;
+    margin-bottom: 16px;
+    display: block;
 }
 
 .logo h1 {
     color: var(--primary);
-    font-size: 28px;
+    font-size: 32px;
     font-weight: 700;
     margin-bottom: 8px;
 }
@@ -194,7 +267,7 @@ body {
 .auth-tabs {
     display: flex;
     background: var(--bg);
-    border-radius: 12px;
+    border-radius: var(--radius-sm);
     padding: 6px;
     margin-bottom: 24px;
 }
@@ -204,7 +277,7 @@ body {
     padding: 12px 16px;
     border: none;
     background: transparent;
-    border-radius: 8px;
+    border-radius: 10px;
     cursor: pointer;
     font-family: inherit;
     font-size: 16px;
@@ -214,7 +287,7 @@ body {
 }
 
 .auth-tab:hover {
-    background: rgba(255, 255, 255, 0.5);
+    background: rgba(255, 255, 255, 0.8);
 }
 
 .auth-tab.active {
@@ -234,18 +307,29 @@ body {
 }
 
 .form-group {
-    margin-bottom: 16px;
+    margin-bottom: 20px;
+    text-align: left;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: var(--text);
+    text-align: left;
 }
 
 .admin-section {
-    margin-top: 8px;
+    margin-top: 16px;
+    padding-top: 16px;
+    border-top: 1px solid var(--bg-hover);
 }
 
 .admin-form {
     margin-top: 16px;
     padding: 20px;
     background: var(--bg);
-    border-radius: 12px;
+    border-radius: var(--radius-sm);
     animation: slideDown 0.3s ease;
 }
 
@@ -263,7 +347,7 @@ body {
     gap: 12px;
     padding: 12px;
     background: var(--bg);
-    border-radius: 12px;
+    border-radius: var(--radius-sm);
     font-weight: 600;
     color: var(--text-light);
 }
@@ -273,7 +357,7 @@ body {
     background: linear-gradient(135deg, var(--primary), var(--secondary));
     color: white;
     padding: 16px 0;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    box-shadow: var(--shadow);
     position: sticky;
     top: 0;
     z-index: 100;
@@ -283,6 +367,9 @@ body {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
 }
 
 .header .logo {
@@ -311,6 +398,14 @@ body {
 .main {
     padding: 40px 0;
     min-height: calc(100vh - 80px);
+    display: flex;
+    flex-direction: column;
+}
+
+.main .container {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
 }
 
 .welcome-section {
@@ -336,21 +431,24 @@ body {
     grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
     gap: 24px;
     margin-bottom: 40px;
+    justify-items: center;
 }
 
 .material-card {
-    background: var(--card-bg);
+    background: var(--bg-card);
     border-radius: var(--radius);
     overflow: hidden;
     box-shadow: var(--shadow);
     transition: all 0.3s ease;
     cursor: pointer;
     border: 2px solid transparent;
+    width: 100%;
+    max-width: 350px;
 }
 
 .material-card:hover {
     transform: translateY(-8px);
-    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+    box-shadow: var(--shadow-lg);
     border-color: var(--primary);
 }
 
@@ -373,6 +471,7 @@ body {
 
 .material-content {
     padding: 20px;
+    text-align: center;
 }
 
 .material-title {
@@ -387,6 +486,7 @@ body {
     font-size: 14px;
     display: flex;
     align-items: center;
+    justify-content: center;
     gap: 6px;
 }
 
@@ -397,19 +497,19 @@ body {
 /* ===== Admin Panel Styles ===== */
 .admin-tabs {
     display: flex;
-    background: var(--card-bg);
+    background: var(--bg-card);
     border-radius: var(--radius);
     padding: 8px;
     margin-bottom: 32px;
     box-shadow: var(--shadow);
+    justify-content: center;
 }
 
 .tab-btn {
-    flex: 1;
-    padding: 16px 20px;
+    padding: 16px 24px;
     border: none;
     background: transparent;
-    border-radius: 12px;
+    border-radius: var(--radius-sm);
     cursor: pointer;
     font-family: inherit;
     font-size: 16px;
@@ -420,10 +520,11 @@ body {
     align-items: center;
     justify-content: center;
     gap: 8px;
+    margin: 0 4px;
 }
 
 .tab-btn:hover {
-    background: var(--bg);
+    background: var(--bg-hover);
     color: var(--text);
 }
 
@@ -455,22 +556,27 @@ body {
     color: var(--text);
     font-size: 28px;
     font-weight: 700;
+    text-align: center;
+    width: 100%;
 }
 
 .tab-description {
     color: var(--text-light);
     font-size: 16px;
     margin-top: 8px;
+    text-align: center;
+    width: 100%;
 }
 
 /* Список материалов в админке */
 .materials-list {
     display: grid;
     gap: 20px;
+    justify-items: center;
 }
 
 .admin-material-card {
-    background: var(--card-bg);
+    background: var(--bg-card);
     border-radius: var(--radius);
     padding: 24px;
     box-shadow: var(--shadow);
@@ -478,17 +584,19 @@ body {
     align-items: center;
     gap: 20px;
     transition: all 0.3s ease;
+    width: 100%;
+    max-width: 800px;
 }
 
 .admin-material-card:hover {
     transform: translateY(-2px);
-    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+    box-shadow: var(--shadow-lg);
 }
 
 .material-preview {
     width: 80px;
     height: 80px;
-    border-radius: 12px;
+    border-radius: var(--radius-sm);
     background: linear-gradient(135deg, var(--primary), var(--secondary));
     display: flex;
     align-items: center;
@@ -502,11 +610,12 @@ body {
     width: 100%;
     height: 100%;
     object-fit: cover;
-    border-radius: 12px;
+    border-radius: var(--radius-sm);
 }
 
 .material-info {
     flex: 1;
+    text-align: left;
 }
 
 .material-info h3 {
@@ -545,14 +654,15 @@ body {
 }
 
 .modal-content {
-    background: var(--card-bg);
+    background: var(--bg-card);
     border-radius: var(--radius);
     width: 100%;
     max-width: 500px;
     max-height: 90vh;
     overflow-y: auto;
-    box-shadow: var(--shadow);
+    box-shadow: var(--shadow-lg);
     animation: modalSlideIn 0.3s ease;
+    margin: 0 auto;
 }
 
 .modal-header {
@@ -581,7 +691,7 @@ body {
 }
 
 .close-btn:hover {
-    background: var(--bg);
+    background: var(--bg-hover);
     color: var(--text);
 }
 
@@ -610,15 +720,15 @@ body {
 .form-actions {
     display: flex;
     gap: 12px;
-    justify-content: flex-end;
+    justify-content: center;
     margin-top: 32px;
 }
 
 /* ===== Utility Styles ===== */
 .loading-spinner {
-    grid-column: 1 / -1;
     text-align: center;
     padding: 60px 20px;
+    width: 100%;
 }
 
 .spinner {
@@ -634,25 +744,28 @@ body {
 .error-message {
     background: var(--error);
     color: white;
-    padding: 12px;
-    border-radius: 8px;
-    margin-bottom: 16px;
+    padding: 16px;
+    border-radius: var(--radius-sm);
+    margin-bottom: 20px;
     animation: shake 0.5s ease;
+    text-align: center;
 }
 
 .success-message {
     background: var(--success);
     color: white;
-    padding: 12px;
-    border-radius: 8px;
-    margin-bottom: 16px;
+    padding: 16px;
+    border-radius: var(--radius-sm);
+    margin-bottom: 20px;
     animation: slideDown 0.3s ease;
+    text-align: center;
 }
 
 .empty-state {
     text-align: center;
     padding: 60px 20px;
     color: var(--text-light);
+    width: 100%;
 }
 
 .empty-state i {
@@ -671,9 +784,11 @@ body {
 .error-page {
     text-align: center;
     padding: 60px 20px;
-    background: var(--card-bg);
+    background: var(--bg-card);
     border-radius: var(--radius);
     box-shadow: var(--shadow);
+    max-width: 600px;
+    margin: 40px auto;
 }
 
 .error-icon {
@@ -802,6 +917,33 @@ body {
 .material-card:nth-child(4) { animation-delay: 0.4s; }
 .material-card:nth-child(5) { animation-delay: 0.5s; }
 
+/* ===== Notification Styles ===== */
+.notification {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: var(--success);
+    color: white;
+    padding: 16px 20px;
+    border-radius: var(--radius-sm);
+    box-shadow: var(--shadow-lg);
+    z-index: 1000;
+    animation: slideInRight 0.3s ease;
+    max-width: 300px;
+}
+
+.notification.error {
+    background: var(--error);
+}
+
+.notification.warning {
+    background: var(--warning);
+}
+
+.notification.info {
+    background: var(--info);
+}
+
 /* ===== Responsive Design ===== */
 @media (max-width: 768px) {
     .materials-grid {
@@ -830,15 +972,22 @@ body {
     
     .tab-header {
         flex-direction: column;
-        align-items: flex-start;
+        align-items: center;
+        text-align: center;
     }
     
     .header-actions {
         flex-wrap: wrap;
+        justify-content: center;
     }
     
     .admin-tabs {
         flex-direction: column;
+        gap: 8px;
+    }
+    
+    .tab-btn {
+        margin: 0;
     }
 }
 
@@ -876,8 +1025,8 @@ body {
     }
     
     .modal-content {
-        margin: 20px;
-        max-height: calc(100vh - 40px);
+        margin: 10px;
+        max-height: calc(100vh - 20px);
     }
     
     .form-actions {
@@ -899,67 +1048,60 @@ body {
     .error-actions .btn {
         width: 100%;
     }
+    
+    .header-content {
+        flex-direction: column;
+        gap: 12px;
+        text-align: center;
+    }
+    
+    .admin-material-card {
+        padding: 16px;
+    }
 }
 
-/* ===== Notification Styles ===== */
-.notification {
-    position: fixed;
-    top: 20px;
-    right: 20px;
-    background: var(--success);
-    color: white;
-    padding: 16px 20px;
-    border-radius: 12px;
-    box-shadow: var(--shadow);
-    z-index: 1000;
-    animation: slideInRight 0.3s ease;
-    max-width: 300px;
+/* Улучшение доступности */
+@media (prefers-reduced-motion: reduce) {
+    * {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
 }
 
-.notification.error {
-    background: var(--error);
+/* Поддержка темной темы */
+@media (prefers-color-scheme: dark) {
+    :root {
+        --text: #f3f4f6;
+        --text-light: #d1d5db;
+        --text-lighter: #9ca3af;
+        --bg: #111827;
+        --bg-card: #1f2937;
+        --bg-hover: #374151;
+    }
+    
+    .input-field {
+        background: var(--bg-card);
+        border-color: #4b5563;
+        color: var(--text);
+    }
+    
+    .input-field::placeholder {
+        color: var(--text-lighter);
+    }
+    
+    .auth-tab:hover {
+        background: rgba(255, 255, 255, 0.1);
+    }
+    
+    .feature {
+        background: var(--bg-hover);
+    }
 }
 
-.notification.warning {
-    background: var(--warning);
-}
-
-/* Дополнительные утилиты */
-.text-center {
-    text-align: center;
-}
-
-.mb-4 {
-    margin-bottom: 24px;
-}
-
-.mt-4 {
-    margin-top: 24px;
-}
-
-.flex {
-    display: flex;
-}
-
-.items-center {
-    align-items: center;
-}
-
-.justify-between {
-    justify-content: space-between;
-}
-
-.gap-4 {
-    gap: 16px;
-}
-
-.w-full {
-    width: 100%;
-}
-
-/* Специфические стили для улучшения UX */
+/* Специфические улучшения UX */
 .input-field::placeholder {
-    color: #a0aec0;
+    color: var(--text-lighter);
 }
 
 .btn:disabled {
@@ -973,31 +1115,24 @@ body {
     box-shadow: none !important;
 }
 
-/* Улучшение доступности */
-@media (prefers-reduced-motion: reduce) {
-    * {
-        animation-duration: 0.01ms !important;
-        animation-iteration-count: 1 !important;
-        transition-duration: 0.01ms !important;
-    }
+/* Центрирование для всех основных страниц */
+body {
+    display: flex;
+    flex-direction: column;
 }
 
-/* Поддержка темной темы (опционально) */
-@media (prefers-color-scheme: dark) {
-    :root {
-        --text: #e2e8f0;
-        --text-light: #a0aec0;
-        --bg: #1a202c;
-        --card-bg: #2d3748;
-    }
-    
-    .input-field {
-        background: var(--bg);
-        border-color: #4a5568;
-        color: var(--text);
-    }
-    
-    .input-field::placeholder {
-        color: #718096;
-    }
+/* Дополнительные классы для центрирования */
+.centered {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.self-center {
+    align-self: center;
+}
+
+.mx-auto {
+    margin-left: auto;
+    margin-right: auto;
 }
