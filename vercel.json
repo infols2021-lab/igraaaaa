@@ -3,37 +3,32 @@
   "name": "kids-learning-app",
   "builds": [
     {
-      "src": "**/*.html",
+      "src": "*.html",
       "use": "@vercel/static"
     },
     {
-      "src": "**/*.js",
+      "src": "*.js", 
       "use": "@vercel/static"
     },
     {
-      "src": "**/*.css", 
+      "src": "*.css",
       "use": "@vercel/static"
     }
   ],
   "routes": [
     {
+      "src": "/_next/static/(.*)",
+      "dest": "/static/$1"
+    },
+    {
+      "src": "/(.*\\.(?:ico|png|jpg|jpeg|gif|svg|css|js|json))",
+      "dest": "/$1"
+    },
+    {
       "src": "/(.*)",
       "dest": "/index.html"
     }
   ],
-  "headers": [
-    {
-      "source": "/(.*)",
-      "headers": [
-        {
-          "key": "X-Frame-Options",
-          "value": "DENY"
-        },
-        {
-          "key": "X-Content-Type-Options",
-          "value": "nosniff"
-        }
-      ]
-    }
-  ]
+  "trailingSlash": false,
+  "cleanUrls": true
 }
