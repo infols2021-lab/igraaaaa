@@ -1,4 +1,4 @@
-/* styles.css - Полная версия с drag-and-drop */
+/* styles.css - Полная версия для приложения "Учимся играя!" */
 
 /* ===== CSS Variables & Reset ===== */
 * {
@@ -100,6 +100,7 @@ body {
     transform: translateY(0);
 }
 
+/* Основная кнопка - синяя */
 .btn-primary {
     background: linear-gradient(135deg, var(--primary), var(--secondary));
     color: white;
@@ -109,6 +110,7 @@ body {
     background: linear-gradient(135deg, var(--primary-dark), var(--secondary-dark));
 }
 
+/* Вторичная кнопка - зеленая */
 .btn-secondary {
     background: linear-gradient(135deg, var(--accent-2), #22c55e);
     color: white;
@@ -119,6 +121,7 @@ body {
     background: linear-gradient(135deg, #22c55e, #16a34a);
 }
 
+/* Акцентная кнопка - фиолетовая */
 .btn-accent {
     background: linear-gradient(135deg, var(--accent-1), #c084fc);
     color: white;
@@ -128,6 +131,7 @@ body {
     background: linear-gradient(135deg, #c084fc, #a855f7);
 }
 
+/* Предупреждающая кнопка - желтая */
 .btn-warning {
     background: linear-gradient(135deg, var(--accent-3), #f59e0b);
     color: white;
@@ -137,6 +141,7 @@ body {
     background: linear-gradient(135deg, #f59e0b, #d97706);
 }
 
+/* Опасная кнопка - красная */
 .btn-danger {
     background: linear-gradient(135deg, var(--accent-4), #ef4444);
     color: white;
@@ -146,6 +151,7 @@ body {
     background: linear-gradient(135deg, #ef4444, #dc2626);
 }
 
+/* Прозрачная кнопка */
 .btn-outline {
     background: transparent;
     color: var(--primary);
@@ -157,6 +163,7 @@ body {
     color: white;
 }
 
+/* Размеры кнопок */
 .btn-large {
     padding: 18px 28px;
     font-size: 18px;
@@ -180,6 +187,24 @@ body {
     margin: 0;
 }
 
+.btn-edit {
+    background: var(--warning);
+    color: white;
+}
+
+.btn-edit:hover {
+    background: #f59e0b;
+}
+
+.btn-delete {
+    background: var(--error);
+    color: white;
+}
+
+.btn-delete:hover {
+    background: #ef4444;
+}
+
 /* Поля ввода */
 .input-field {
     width: 100%;
@@ -196,6 +221,11 @@ body {
     outline: none;
     border-color: var(--primary);
     box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+textarea.input-field {
+    resize: vertical;
+    min-height: 80px;
 }
 
 /* ===== Drag & Drop Upload Area ===== */
@@ -747,6 +777,101 @@ body {
     gap: 12px;
 }
 
+/* ===== Assignment Styles ===== */
+.assignment-controls {
+    display: flex;
+    gap: 16px;
+    align-items: center;
+    width: 100%;
+    flex-wrap: wrap;
+}
+
+.assignment-controls .input-field {
+    flex: 1;
+    min-width: 200px;
+}
+
+.assignment-controls .btn {
+    width: auto;
+    margin: 0;
+}
+
+.assignments-list {
+    display: grid;
+    gap: 20px;
+    width: 100%;
+}
+
+.assignment-card {
+    background: var(--bg-card);
+    border-radius: var(--radius);
+    padding: 24px;
+    box-shadow: var(--shadow);
+    transition: all 0.3s ease;
+    border-left: 4px solid var(--primary);
+}
+
+.assignment-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg);
+}
+
+.assignment-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+.assignment-header h3 {
+    color: var(--text);
+    font-size: 20px;
+    font-weight: 700;
+    margin: 0;
+}
+
+.assignment-type-badge {
+    background: var(--primary);
+    color: white;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.assignment-content {
+    margin-bottom: 16px;
+}
+
+.assignment-content p {
+    color: var(--text-light);
+    margin-bottom: 12px;
+}
+
+.assignment-meta {
+    display: flex;
+    gap: 20px;
+    color: var(--text-lighter);
+    font-size: 14px;
+}
+
+.assignment-meta i {
+    margin-right: 4px;
+}
+
+.assignment-actions {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.assignment-actions .btn {
+    width: auto;
+    margin: 0;
+}
+
 /* ===== Modal Styles ===== */
 .modal {
     position: fixed;
@@ -773,6 +898,10 @@ body {
     box-shadow: var(--shadow-lg);
     animation: modalSlideIn 0.3s ease;
     margin: 0 auto;
+}
+
+.modal-content.large {
+    max-width: 800px;
 }
 
 .modal-header {
@@ -832,6 +961,182 @@ body {
     gap: 12px;
     justify-content: center;
     margin-top: 32px;
+}
+
+/* ===== Questions Styles ===== */
+.questions-container {
+    margin: 24px 0;
+    border: 2px dashed var(--bg-hover);
+    border-radius: var(--radius-sm);
+    padding: 20px;
+    min-height: 100px;
+}
+
+.empty-questions {
+    text-align: center;
+    color: var(--text-lighter);
+    padding: 40px 20px;
+}
+
+.empty-questions i {
+    font-size: 48px;
+    margin-bottom: 16px;
+    color: var(--primary-light);
+}
+
+.questions-list {
+    width: 100%;
+}
+
+.questions-list h4 {
+    color: var(--text);
+    margin-bottom: 16px;
+    font-size: 18px;
+}
+
+.question-item {
+    background: var(--bg);
+    border-radius: var(--radius-sm);
+    padding: 16px;
+    margin-bottom: 12px;
+    border-left: 3px solid var(--accent-2);
+}
+
+.question-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.question-type {
+    background: var(--primary-light);
+    color: var(--primary-dark);
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 600;
+}
+
+.question-text {
+    color: var(--text);
+    margin-bottom: 12px;
+    font-weight: 500;
+}
+
+.question-actions {
+    display: flex;
+    gap: 8px;
+    justify-content: flex-end;
+}
+
+/* Стили для форм вопросов */
+.question-form {
+    background: var(--bg);
+    border-radius: var(--radius-sm);
+    padding: 20px;
+    margin-bottom: 20px;
+}
+
+.question-form h4 {
+    color: var(--text);
+    margin-bottom: 16px;
+    font-size: 16px;
+    border-bottom: 2px solid var(--primary);
+    padding-bottom: 8px;
+}
+
+.images-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: 12px;
+    margin-bottom: 12px;
+}
+
+.image-upload-item {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.upload-area-small {
+    border: 2px dashed #cbd5e0;
+    border-radius: 8px;
+    padding: 20px 10px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    background: var(--bg-card);
+    height: 100px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.upload-area-small:hover {
+    border-color: var(--primary);
+    background: var(--bg-hover);
+}
+
+.upload-area-small.drag-over {
+    border-color: var(--primary);
+    background: var(--primary-light);
+}
+
+.upload-area-small img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 6px;
+}
+
+.upload-area-small i {
+    font-size: 20px;
+    color: var(--text-lighter);
+}
+
+.upload-area-small span {
+    font-size: 12px;
+    color: var(--text-light);
+}
+
+.words-list,
+.syllables-list,
+.category-items {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 12px;
+}
+
+.word-item,
+.syllable-item,
+.category-item {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.word-item .input-field,
+.syllable-item .input-field,
+.category-item .input-field {
+    flex: 1;
+    min-width: 120px;
+}
+
+.position-select {
+    padding: 12px;
+    border: 2px solid #e2e8f0;
+    border-radius: var(--radius-sm);
+    background: var(--bg-card);
+    color: var(--text);
+    min-width: 120px;
 }
 
 /* ===== Utility Styles ===== */
@@ -1021,6 +1326,17 @@ body {
     50% { opacity: 0.7; }
 }
 
+@keyframes slideInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
 /* Анимация появления карточек */
 .material-card {
     animation: fadeInUp 0.6s ease forwards;
@@ -1031,6 +1347,16 @@ body {
 .material-card:nth-child(3) { animation-delay: 0.3s; }
 .material-card:nth-child(4) { animation-delay: 0.4s; }
 .material-card:nth-child(5) { animation-delay: 0.5s; }
+
+.assignment-card {
+    animation: slideInUp 0.4s ease forwards;
+}
+
+.assignment-card:nth-child(1) { animation-delay: 0.1s; }
+.assignment-card:nth-child(2) { animation-delay: 0.2s; }
+.assignment-card:nth-child(3) { animation-delay: 0.3s; }
+.assignment-card:nth-child(4) { animation-delay: 0.4s; }
+.assignment-card:nth-child(5) { animation-delay: 0.5s; }
 
 /* ===== Notification Styles ===== */
 .notification {
@@ -1111,6 +1437,40 @@ body {
     
     .upload-placeholder i {
         font-size: 36px;
+    }
+    
+    .assignment-controls {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .assignment-controls .input-field {
+        min-width: auto;
+    }
+    
+    .assignment-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .assignment-actions {
+        justify-content: center;
+    }
+    
+    .word-item,
+    .syllable-item,
+    .category-item {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .images-grid {
+        grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+    }
+    
+    .modal-content.large {
+        margin: 10px;
+        max-width: calc(100vw - 20px);
     }
 }
 
@@ -1193,6 +1553,28 @@ body {
     .upload-placeholder p {
         font-size: 14px;
     }
+    
+    .assignment-card {
+        padding: 16px;
+    }
+    
+    .assignment-meta {
+        flex-direction: column;
+        gap: 8px;
+    }
+    
+    .images-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .upload-area-small {
+        padding: 15px 8px;
+        height: 80px;
+    }
+    
+    .upload-area-small span {
+        font-size: 10px;
+    }
 }
 
 /* Улучшение доступности */
@@ -1235,6 +1617,11 @@ body {
     
     .upload-area {
         background: var(--bg-hover);
+        border-color: #4b5563;
+    }
+    
+    .upload-area-small {
+        background: var(--bg-card);
         border-color: #4b5563;
     }
 }
@@ -1305,4 +1692,58 @@ body {
     z-index: 2;
     font-weight: 600;
     color: var(--primary);
+}
+
+/* Улучшения UX для форм */
+.question-form .form-group:last-child {
+    margin-bottom: 0;
+}
+
+.add-image-btn,
+.add-word-btn,
+.add-syllable-btn,
+.add-category-item {
+    width: auto !important;
+    margin: 0 !important;
+}
+
+.remove-image,
+.remove-word,
+.remove-syllable,
+.remove-item {
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    z-index: 2;
+}
+
+.image-upload-item {
+    position: relative;
+}
+
+/* Улучшения для удаления загруженных изображений */
+.remove-uploaded-image {
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    z-index: 2;
+}
+
+.upload-area-small,
+.upload-area {
+    position: relative;
 }

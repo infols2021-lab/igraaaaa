@@ -65,13 +65,22 @@
             <div id="assignmentsTab" class="tab-content">
                 <div class="tab-header">
                     <h2>Управление заданиями</h2>
-                    <p class="tab-description">Выберите материал чтобы управлять его заданиями</p>
+                    <div class="assignment-controls">
+                        <select id="materialSelect" class="input-field">
+                            <option value="">Выберите материал</option>
+                        </select>
+                        <button id="addAssignmentBtn" class="btn btn-primary" style="display: none;">
+                            <i class="fas fa-plus"></i>
+                            Добавить задание
+                        </button>
+                    </div>
                 </div>
+                
                 <div id="assignmentsContent">
                     <div class="empty-state">
-                        <i class="fas fa-tasks"></i>
-                        <h3>Функционал заданий</h3>
-                        <p>Сначала создайте материалы, затем сможете добавлять задания к ним</p>
+                        <i class="fas fa-book-open"></i>
+                        <h3>Выберите материал</h3>
+                        <p>Выберите материал из списка чтобы просмотреть или создать задания</p>
                     </div>
                 </div>
             </div>
@@ -138,6 +147,73 @@
         </div>
     </div>
 
+    <!-- Модальное окно создания/редактирования задания -->
+    <div id="assignmentModal" class="modal hidden">
+        <div class="modal-content large">
+            <div class="modal-header">
+                <h3 id="modalAssignmentTitle">Добавить задание</h3>
+                <button class="close-btn" id="closeAssignmentModal">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            
+            <form id="assignmentForm" class="modal-form">
+                <input type="hidden" id="assignmentId">
+                
+                <div class="form-group">
+                    <label for="assignmentTitle">Название задания *</label>
+                    <input type="text" id="assignmentTitle" class="input-field" required 
+                           placeholder="Например: Звук А в словах">
+                </div>
+
+                <div class="form-group">
+                    <label for="assignmentDescription">Описание задания</label>
+                    <textarea id="assignmentDescription" class="input-field" rows="3" 
+                              placeholder="Описание задания для учеников"></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="soundLetter">Изучаемый звук/буква *</label>
+                    <input type="text" id="soundLetter" class="input-field" required 
+                           placeholder="Например: А, К, М">
+                </div>
+
+                <div class="form-group">
+                    <label for="questionType">Тип задания *</label>
+                    <select id="questionType" class="input-field" required>
+                        <option value="type1">Тип 1: Выбор картинок со звуком</option>
+                        <option value="type2">Тип 2: Схема "начало-середина-конец"</option>
+                        <option value="type3">Тип 3: Деление на слоги</option>
+                        <option value="type4">Тип 4: Разделение по категориям</option>
+                    </select>
+                </div>
+
+                <!-- Форма для конкретного типа вопроса -->
+                <div id="questionFormContainer"></div>
+
+                <!-- Кнопка добавления вопроса -->
+                <div class="form-actions">
+                    <button type="button" id="addQuestionBtn" class="btn btn-accent">
+                        <i class="fas fa-plus"></i>
+                        Добавить вопрос
+                    </button>
+                </div>
+
+                <!-- Список добавленных вопросов -->
+                <div id="questionsList" class="questions-container"></div>
+
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary" id="cancelAssignmentBtn">Отмена</button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save"></i>
+                        Сохранить задание
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <script type="module" src="admin-materials.js"></script>
+    <script type="module" src="admin-assignments.js"></script>
 </body>
 </html>
