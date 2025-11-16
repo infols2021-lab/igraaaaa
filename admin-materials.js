@@ -297,7 +297,7 @@ document.addEventListener('DOMContentLoaded', function() {
             <div class="admin-material-card" data-id="${material.id}">
                 <div class="material-preview">
                     ${material.image_url 
-                        ? `<img src="${material.image_url}" alt="${material.title}" onerror="this.style.display='none'; this.parentElement.innerHTML='${getMaterialIcon(material.title)}'">`
+                        ? `<img src="${material.image_url}" alt="${material.title}" onerror="this.style.display='none'">`
                         : getMaterialIcon(material.title)
                     }
                 </div>
@@ -450,12 +450,24 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 
         try {
+            // Сначала удаляем все задания, связанные с этим материалом
+            const { error: assignmentsError } = await supabase
+                .from('assignments')
+                .delete()
+                .eq('material_id', materialId);
+
+            if (assignmentsError) {
+                console.error('Ошибка удаления заданий:', assignmentsError);
+                throw new Error('Не удалось удалить связанные задания');
+            }
+
             // Находим материал для удаления изображения
             const material = materials.find(m => m.id === materialId);
             if (material && material.image_url) {
                 await deleteImageFromStorage(material.image_url);
             }
 
+            // Удаляем сам материал
             const { error } = await supabase
                 .from('materials')
                 .delete()
@@ -468,7 +480,10 @@ document.addEventListener('DOMContentLoaded', function() {
 
         } catch (error) {
             console.error('Ошибка удаления:', error);
-            showNotification('Ошибка при удалении материала', 'error');
+            showNotification(
+                error.message || 'Ошибка при удалении материала', 
+                'error'
+            );
         }
     };
 
