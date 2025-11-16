@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Панель учителя - Учимся играя!</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <header class="header">
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">
+                    <span class="logo-icon">👨‍🏫</span>
+                    <h1>Панель учителя</h1>
+                </div>
+                <div class="header-actions">
+                    <button id="backToSite" class="btn btn-secondary btn-small">
+                        <i class="fas fa-home"></i>
+                        На сайт
+                    </button>
+                    <button id="logoutBtn" class="btn btn-secondary btn-small">
+                        <i class="fas fa-sign-out-alt"></i>
+                        Выйти
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="main">
+        <div class="container">
+            <div class="admin-tabs">
+                <button class="tab-btn active" data-tab="materials">
+                    <i class="fas fa-book"></i>
+                    Материалы
+                </button>
+                <button class="tab-btn" data-tab="assignments">
+                    <i class="fas fa-tasks"></i>
+                    Задания
+                </button>
+            </div>
+
+            <!-- Вкладка материалов -->
+            <div id="materialsTab" class="tab-content active">
+                <div class="tab-header">
+                    <h2>Управление материалами</h2>
+                    <button id="addMaterialBtn" class="btn btn-primary">
+                        <i class="fas fa-plus"></i>
+                        Добавить материал
+                    </button>
+                </div>
+
+                <div class="materials-list" id="materialsList">
+                    <!-- Список материалов будет здесь -->
+                    <div class="loading-spinner">
+                        <div class="spinner"></div>
+                        <p>Загружаем материалы...</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Вкладка заданий -->
+            <div id="assignmentsTab" class="tab-content">
+                <div class="tab-header">
+                    <h2>Управление заданиями</h2>
+                    <p class="tab-description">Выберите материал чтобы управлять его заданиями</p>
+                </div>
+                <div id="assignmentsContent">
+                    <div class="empty-state">
+                        <i class="fas fa-tasks"></i>
+                        <h3>Функционал заданий</h3>
+                        <p>Сначала создайте материалы, затем сможете добавлять задания к ним</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Модальное окно добавления/редактирования материала -->
+    <div id="materialModal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modalTitle">Добавить материал</h3>
+                <button class="close-btn" id="closeModal">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <form id="materialForm" class="modal-form">
+                <input type="hidden" id="materialId">
+                
+                <div class="form-group">
+                    <label for="materialTitle">Название материала</label>
+                    <input type="text" id="materialTitle" class="input-field" required 
+                           placeholder="Например: Математика для начинающих">
+                </div>
+
+                <div class="form-group">
+                    <label for="materialImage">URL изображения (необязательно)</label>
+                    <input type="url" id="materialImage" class="input-field" 
+                           placeholder="https://example.com/image.jpg">
+                    <small>Можно оставить пустым - будет использована иконка по умолчанию</small>
+                </div>
+
+                <div class="form-group">
+                    <label for="displayOrder">Порядок отображения</label>
+                    <input type="number" id="displayOrder" class="input-field" value="0" 
+                           placeholder="Чем меньше число, тем выше в списке">
+                </div>
+
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary" id="cancelBtn">Отмена</button>
+                    <button type="submit" class="btn btn-primary" id="saveMaterialBtn">
+                        <i class="fas fa-save"></i>
+                        Сохранить
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script type="module" src="admin-materials.js"></script>
+</body>
+</html>

@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Учимся играя!</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <div class="login-card">
+            <div class="logo">
+                <div class="logo-icon">🎓</div>
+                <h1>Учимся играя!</h1>
+                <p>Интересные задания для детей</p>
+            </div>
+
+            <!-- Табы для переключения между входом и регистрацией -->
+            <div class="auth-tabs">
+                <button class="auth-tab active" data-tab="login">Вход</button>
+                <button class="auth-tab" data-tab="register">Регистрация</button>
+            </div>
+
+            <!-- Форма входа -->
+            <div id="loginForm" class="auth-form active">
+                <div class="form-group">
+                    <input type="email" id="loginEmail" placeholder="Email" class="input-field" required>
+                </div>
+                <div class="form-group">
+                    <input type="password" id="loginPassword" placeholder="Пароль" class="input-field" required>
+                </div>
+                <button id="loginBtn" class="btn btn-primary btn-large">
+                    <i class="fas fa-sign-in-alt"></i>
+                    Войти
+                </button>
+            </div>
+
+            <!-- Форма регистрации -->
+            <div id="registerForm" class="auth-form">
+                <div class="form-group">
+                    <input type="email" id="registerEmail" placeholder="Email" class="input-field" required>
+                </div>
+                <div class="form-group">
+                    <input type="password" id="registerPassword" placeholder="Пароль" class="input-field" required>
+                </div>
+                <div class="form-group">
+                    <input type="password" id="confirmPassword" placeholder="Повторите пароль" class="input-field" required>
+                </div>
+                <button id="registerBtn" class="btn btn-primary btn-large">
+                    <i class="fas fa-user-plus"></i>
+                    Зарегистрироваться
+                </button>
+            </div>
+
+            <!-- Раздел для админа -->
+            <div class="admin-section">
+                <button id="adminLoginBtn" class="btn btn-secondary">
+                    <i class="fas fa-lock"></i>
+                    Войти как учитель
+                </button>
+                
+                <div id="adminForm" class="admin-form hidden">
+                    <input type="email" id="adminEmail" placeholder="Email учителя" class="input-field">
+                    <input type="password" id="adminPassword" placeholder="Пароль" class="input-field">
+                    <button id="adminLogin" class="btn btn-secondary btn-small">
+                        Войти
+                    </button>
+                </div>
+            </div>
+
+            <div class="features">
+                <div class="feature">
+                    <i class="fas fa-gamepad"></i> Интерактивные задания
+                </div>
+                <div class="feature">
+                    <i class="fas fa-bolt"></i> Мгновенная проверка
+                </div>
+                <div class="feature">
+                    <i class="fas fa-mobile-alt"></i> На любом устройстве
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script type="module" src="auth.js"></script>
+</body>
+</html>

@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="ru">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Материалы - Учимся играя!</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <header class="header">
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">
+                    <span class="logo-icon">🎓</span>
+                    <h1>Учимся играя!</h1>
+                </div>
+                <button id="logoutBtn" class="btn btn-secondary btn-small">
+                    <i class="fas fa-sign-out-alt"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="main">
+        <div class="container">
+            <div class="welcome-section">
+                <h2>Выбери тему для изучения!</h2>
+                <p>Интересные задания ждут тебя 🚀</p>
+            </div>
+
+            <div class="materials-grid" id="materialsContainer">
+                <!-- Материалы будут загружаться сюда -->
+                <div class="loading-spinner">
+                    <div class="spinner"></div>
+                    <p>Загружаем материалы...</p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script type="module" src="materials.js"></script>
+</body>
+</html>
