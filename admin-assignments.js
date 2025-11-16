@@ -9,6 +9,7 @@ export class AssignmentManager {
         this.assignments = [];
         this.materials = [];
         this.questions = [];
+        this.uploadedImages = new Map(); // Храним временные изображения
         
         this.initialize();
     }
@@ -106,8 +107,12 @@ export class AssignmentManager {
                 e.preventDefault();
                 const item = e.target.closest('.image-upload-item');
                 const container = item.parentElement;
-                if (container.querySelectorAll('.image-upload-item').length > 1) {
+                const items = container.querySelectorAll('.image-upload-item');
+                if (items.length > 1) {
                     item.remove();
+                } else {
+                    // Если последний элемент - сбрасываем его
+                    this.resetUploadArea(item.querySelector('.upload-area-small'));
                 }
             }
             
@@ -115,7 +120,8 @@ export class AssignmentManager {
                 e.preventDefault();
                 const wordItem = e.target.closest('.word-item');
                 const container = wordItem.parentElement;
-                if (container.querySelectorAll('.word-item').length > 1) {
+                const items = container.querySelectorAll('.word-item');
+                if (items.length > 1) {
                     wordItem.remove();
                 }
             }
@@ -124,7 +130,8 @@ export class AssignmentManager {
                 e.preventDefault();
                 const syllableItem = e.target.closest('.syllable-item');
                 const container = syllableItem.parentElement;
-                if (container.querySelectorAll('.syllable-item').length > 1) {
+                const items = container.querySelectorAll('.syllable-item');
+                if (items.length > 1) {
                     syllableItem.remove();
                 }
             }
@@ -133,7 +140,8 @@ export class AssignmentManager {
                 e.preventDefault();
                 const categoryItem = e.target.closest('.category-item');
                 const container = categoryItem.parentElement;
-                if (container.querySelectorAll('.category-item').length > 1) {
+                const items = container.querySelectorAll('.category-item');
+                if (items.length > 1) {
                     categoryItem.remove();
                 }
             }
@@ -313,10 +321,12 @@ export class AssignmentManager {
         this.currentEditingId = assignment ? assignment.id : null;
         this.questions = assignment ? (assignment.questions || []) : [];
         this.currentEditingQuestionId = null;
+        this.uploadedImages.clear();
 
         if (assignment) {
             document.getElementById('modalAssignmentTitle').textContent = 'Редактировать задание';
-            document.getElementById('assignmentTitle').value = assignment.title;
+            document.getElementById('assignmentId').value = assignment.id || '';
+            document.getElementById('assignmentTitle').value = assignment.title || '';
             document.getElementById('assignmentDescription').value = assignment.description || '';
             document.getElementById('soundLetter').value = assignment.sound_letter || '';
             document.getElementById('questionType').value = assignment.question_type || 'type1';
@@ -338,6 +348,7 @@ export class AssignmentManager {
         this.currentEditingId = null;
         this.currentEditingQuestionId = null;
         this.questions = [];
+        this.uploadedImages.clear();
         document.getElementById('assignmentForm').reset();
     }
 
@@ -614,6 +625,8 @@ export class AssignmentManager {
             <span>Добавить картинку</span>
             <input type="file" accept="image/*" class="hidden">
         `;
+        // Удаляем файл из input
+        area.querySelector('input[type="file"]').value = '';
     }
 
     async handleImageUpload(event, area) {
@@ -634,16 +647,50 @@ export class AssignmentManager {
             return;
         }
 
-        const reader = new FileReader();
-        reader.onload = (e) => {
-            area.innerHTML = `
-                <img src="${e.target.result}" alt="Превью">
-                <button type="button" class="btn btn-danger btn-small remove-uploaded-image">
-                    <i class="fas fa-times"></i>
-                </button>
-            `;
-        };
-        reader.readAsDataURL(file);
+        try {
+            const imageId = 'img_' + Date.now();
+            const imageUrl = await this.uploadImageToStorage(file, imageId);
+            
+            if (imageUrl) {
+                this.uploadedImages.set(area, { file, imageUrl, imageId });
+                area.innerHTML = `
+                    <img src="${imageUrl}" alt="Превью">
+                    <button type="button" class="btn btn-danger btn-small remove-uploaded-image">
+                        <i class="fas fa-times"></i>
+                    </button>
+                `;
+            }
+        } catch (error) {
+            this.showNotification('Ошибка загрузки изображения', 'error');
+            console.error('Ошибка загрузки:', error);
+        }
+    }
+
+    async uploadImageToStorage(file, imageId) {
+        try {
+            const fileExt = file.name.split('.').pop();
+            const fileName = `${imageId}.${fileExt}`;
+            const filePath = `assignments/temp/${fileName}`;
+
+            const { data, error } = await supabase.storage
+                .from('materials')
+                .upload(filePath, file, {
+                    cacheControl: '3600',
+                    upsert: false
+                });
+
+            if (error) throw error;
+
+            const { data: { publicUrl } } = supabase.storage
+                .from('materials')
+                .getPublicUrl(filePath);
+
+            return publicUrl;
+
+        } catch (error) {
+            console.error('Ошибка загрузки изображения:', error);
+            throw error;
+        }
     }
 
     handleQuestionSubmit() {
@@ -654,31 +701,35 @@ export class AssignmentManager {
             return;
         }
 
-        if (this.currentEditingQuestionId) {
-            // Обновление существующего вопроса
-            const index = this.questions.findIndex(q => q.id === this.currentEditingQuestionId);
-            if (index !== -1) {
-                this.questions[index] = { ...questionData, id: this.currentEditingQuestionId };
-                this.showNotification('Вопрос обновлен!', 'success');
+        try {
+            if (this.currentEditingQuestionId) {
+                // Обновление существующего вопроса
+                const index = this.questions.findIndex(q => q.id === this.currentEditingQuestionId);
+                if (index !== -1) {
+                    this.questions[index] = { ...questionData, id: this.currentEditingQuestionId };
+                    this.showNotification('Вопрос обновлен!', 'success');
+                }
+                this.currentEditingQuestionId = null;
+                document.getElementById('addQuestionBtn').innerHTML = '<i class="fas fa-plus"></i> Добавить вопрос';
+            } else {
+                // Добавление нового вопроса
+                questionData.id = Date.now().toString();
+                this.questions.push(questionData);
+                this.showNotification('Вопрос добавлен!', 'success');
             }
-            this.currentEditingQuestionId = null;
-            document.getElementById('addQuestionBtn').innerHTML = '<i class="fas fa-plus"></i> Добавить вопрос';
-        } else {
-            // Добавление нового вопроса
-            questionData.id = Date.now() + Math.random();
-            this.questions.push(questionData);
-            this.showNotification('Вопрос добавлен!', 'success');
-        }
 
-        this.renderQuestionsList();
-        this.clearQuestionForm();
+            this.renderQuestionsList();
+            this.clearQuestionForm();
+
+        } catch (error) {
+            this.showNotification(error.message, 'error');
+        }
     }
 
     collectQuestionData(type) {
         const questionText = document.querySelector('.question-text')?.value.trim();
         if (!questionText) {
-            this.showNotification('Введите текст вопроса', 'error');
-            return null;
+            throw new Error('Введите текст вопроса');
         }
 
         const baseData = {
@@ -686,29 +737,43 @@ export class AssignmentManager {
             question: questionText
         };
 
-        try {
-            switch (type) {
-                case 'type1':
-                    return this.collectType1Data(baseData);
-                case 'type2':
-                    return this.collectType2Data(baseData);
-                case 'type3':
-                    return this.collectType3Data(baseData);
-                case 'type4':
-                    return this.collectType4Data(baseData);
-                default:
-                    return null;
-            }
-        } catch (error) {
-            this.showNotification(error.message, 'error');
-            return null;
+        switch (type) {
+            case 'type1':
+                return this.collectType1Data(baseData);
+            case 'type2':
+                return this.collectType2Data(baseData);
+            case 'type3':
+                return this.collectType3Data(baseData);
+            case 'type4':
+                return this.collectType4Data(baseData);
+            default:
+                throw new Error('Неизвестный тип вопроса');
         }
     }
 
     collectType1Data(baseData) {
-        const correctImages = Array.from(document.querySelectorAll('[data-correct="true"] img')).map(img => img.src);
-        const incorrectImages = Array.from(document.querySelectorAll('[data-correct="false"] img')).map(img => img.src);
+        const correctItems = document.querySelectorAll('[data-correct="true"]');
+        const incorrectItems = document.querySelectorAll('[data-correct="false"]');
         
+        const correctImages = [];
+        const incorrectImages = [];
+
+        // Собираем правильные изображения
+        correctItems.forEach(item => {
+            const img = item.querySelector('img');
+            if (img && img.src) {
+                correctImages.push(img.src);
+            }
+        });
+
+        // Собираем неправильные изображения
+        incorrectItems.forEach(item => {
+            const img = item.querySelector('img');
+            if (img && img.src) {
+                incorrectImages.push(img.src);
+            }
+        });
+
         if (correctImages.length === 0) {
             throw new Error('Добавьте хотя бы одну правильную картинку');
         }
@@ -724,16 +789,19 @@ export class AssignmentManager {
     }
 
     collectType2Data(baseData) {
-        const words = Array.from(document.querySelectorAll('.word-item')).map(item => {
+        const wordItems = document.querySelectorAll('.word-item');
+        const words = [];
+
+        wordItems.forEach(item => {
             const word = item.querySelector('.word-input').value.trim();
             const position = item.querySelector('.position-select').value;
-            const image = item.querySelector('img')?.src;
+            const image = item.querySelector('img')?.src || null;
 
             if (!word) {
                 throw new Error('Заполните все поля слов');
             }
 
-            return { word, position, image };
+            words.push({ word, position, image });
         });
 
         if (words.length === 0) {
@@ -747,16 +815,19 @@ export class AssignmentManager {
     }
 
     collectType3Data(baseData) {
-        const syllables = Array.from(document.querySelectorAll('.syllable-item')).map(item => {
+        const syllableItems = document.querySelectorAll('.syllable-item');
+        const syllables = [];
+
+        syllableItems.forEach(item => {
             const word = item.querySelector('.word-input').value.trim();
             const pattern = item.querySelector('.pattern-input').value.trim();
-            const image = item.querySelector('img')?.src;
+            const image = item.querySelector('img')?.src || null;
 
             if (!word || !pattern) {
                 throw new Error('Заполните все поля слов и схем');
             }
 
-            return { word, pattern, image };
+            syllables.push({ word, pattern, image });
         });
 
         if (syllables.length === 0) {
@@ -777,11 +848,14 @@ export class AssignmentManager {
             throw new Error('Заполните названия обеих категорий');
         }
 
+        const category1Items = document.querySelectorAll('[data-category="1"] .category-item');
+        const category2Items = document.querySelectorAll('[data-category="2"] .category-item');
+
         const category1 = {
             name: category1Name,
-            items: Array.from(document.querySelectorAll('[data-category="1"] .category-item')).map(item => {
+            items: Array.from(category1Items).map(item => {
                 const text = item.querySelector('.item-input').value.trim();
-                const image = item.querySelector('img')?.src;
+                const image = item.querySelector('img')?.src || null;
 
                 if (!text) {
                     throw new Error('Заполните все поля элементов категорий');
@@ -793,9 +867,9 @@ export class AssignmentManager {
 
         const category2 = {
             name: category2Name,
-            items: Array.from(document.querySelectorAll('[data-category="2"] .category-item')).map(item => {
+            items: Array.from(category2Items).map(item => {
                 const text = item.querySelector('.item-input').value.trim();
-                const image = item.querySelector('img')?.src;
+                const image = item.querySelector('img')?.src || null;
 
                 if (!text) {
                     throw new Error('Заполните все поля элементов категорий');
@@ -818,6 +892,8 @@ export class AssignmentManager {
     clearQuestionForm() {
         const questionType = document.getElementById('questionType').value;
         this.renderQuestionForm(questionType);
+        this.currentEditingQuestionId = null;
+        document.getElementById('addQuestionBtn').innerHTML = '<i class="fas fa-plus"></i> Добавить вопрос';
     }
 
     renderQuestionsList() {
@@ -843,12 +919,15 @@ export class AssignmentManager {
                             <span class="question-type">${this.getQuestionTypeLabel(question.type)}</span>
                         </div>
                         <div class="question-text">${question.question}</div>
+                        <div class="question-preview">
+                            ${this.getQuestionPreview(question)}
+                        </div>
                         <div class="question-actions">
                             <button type="button" class="btn btn-warning btn-small edit-question" data-id="${question.id}">
-                                <i class="fas fa-edit"></i>
+                                <i class="fas fa-edit"></i> Редактировать
                             </button>
                             <button type="button" class="btn btn-danger btn-small remove-question" data-id="${question.id}">
-                                <i class="fas fa-trash"></i>
+                                <i class="fas fa-trash"></i> Удалить
                             </button>
                         </div>
                     </div>
@@ -857,12 +936,32 @@ export class AssignmentManager {
         `;
     }
 
+    getQuestionPreview(question) {
+        switch (question.type) {
+            case 'type1':
+                return `<div>Правильных: ${question.correctImages?.length || 0}, Неправильных: ${question.incorrectImages?.length || 0}</div>`;
+            case 'type2':
+                return `<div>Слов: ${question.words?.length || 0}</div>`;
+            case 'type3':
+                return `<div>Слов: ${question.syllables?.length || 0}</div>`;
+            case 'type4':
+                return `<div>Категории: "${question.categories?.[0]?.name}", "${question.categories?.[1]?.name}"</div>`;
+            default:
+                return '';
+        }
+    }
+
     removeQuestion(questionId) {
         if (!confirm('Удалить этот вопрос?')) return;
         
         this.questions = this.questions.filter(q => q.id !== questionId);
         this.renderQuestionsList();
         this.showNotification('Вопрос удален', 'success');
+        
+        // Если удаляли редактируемый вопрос - сбрасываем форму
+        if (this.currentEditingQuestionId === questionId) {
+            this.clearQuestionForm();
+        }
     }
 
     editQuestion(questionId) {
@@ -873,7 +972,10 @@ export class AssignmentManager {
         if (question) {
             document.getElementById('questionType').value = question.type;
             this.renderQuestionForm(question.type);
-            this.fillQuestionForm(question);
+            // Небольшая задержка для гарантии отрисовки формы
+            setTimeout(() => {
+                this.fillQuestionForm(question);
+            }, 50);
         }
     }
 
@@ -882,7 +984,10 @@ export class AssignmentManager {
         if (!targetQuestion) return;
 
         // Заполняем основной текст вопроса
-        document.querySelector('.question-text').value = targetQuestion.question;
+        const questionText = document.querySelector('.question-text');
+        if (questionText) {
+            questionText.value = targetQuestion.question;
+        }
 
         switch (targetQuestion.type) {
             case 'type1':
@@ -901,163 +1006,170 @@ export class AssignmentManager {
     }
 
     fillType1Form(question) {
-        // Очищаем текущие картинки кроме первой
-        document.querySelectorAll('.image-upload-item').forEach((item, index) => {
-            if (index > 0) item.remove();
-        });
+        // Очищаем текущие картинки
+        document.querySelectorAll('.image-upload-item').forEach(item => item.remove());
 
         // Заполняем правильные картинки
-        question.correctImages.forEach((imageSrc, index) => {
-            if (index === 0) {
-                const container = document.querySelector('[data-correct="true"] .upload-area-small');
-                container.innerHTML = `
-                    <img src="${imageSrc}" alt="Превью">
-                    <button type="button" class="btn btn-danger btn-small remove-uploaded-image">
-                        <i class="fas fa-times"></i>
-                    </button>
-                `;
-            } else {
-                this.addImageUploadItem(true);
-                const items = document.querySelectorAll('[data-correct="true"]');
-                const lastItem = items[items.length - 1];
-                lastItem.querySelector('.upload-area-small').innerHTML = `
-                    <img src="${imageSrc}" alt="Превью">
-                    <button type="button" class="btn btn-danger btn-small remove-uploaded-image">
-                        <i class="fas fa-times"></i>
-                    </button>
-                `;
-            }
-        });
+        if (question.correctImages && question.correctImages.length > 0) {
+            question.correctImages.forEach((imageSrc, index) => {
+                if (index === 0) {
+                    this.addImageUploadItem(true);
+                    const container = document.querySelector('[data-correct="true"] .upload-area-small');
+                    container.innerHTML = `
+                        <img src="${imageSrc}" alt="Превью">
+                        <button type="button" class="btn btn-danger btn-small remove-uploaded-image">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    `;
+                } else {
+                    this.addImageUploadItem(true);
+                    const items = document.querySelectorAll('[data-correct="true"]');
+                    const lastItem = items[items.length - 1];
+                    lastItem.querySelector('.upload-area-small').innerHTML = `
+                        <img src="${imageSrc}" alt="Превью">
+                        <button type="button" class="btn btn-danger btn-small remove-uploaded-image">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    `;
+                }
+            });
+        } else {
+            this.addImageUploadItem(true);
+        }
 
         // Заполняем неправильные картинки
-        question.incorrectImages.forEach((imageSrc, index) => {
-            if (index === 0) {
-                const container = document.querySelector('[data-correct="false"] .upload-area-small');
-                container.innerHTML = `
-                    <img src="${imageSrc}" alt="Превью">
-                    <button type="button" class="btn btn-danger btn-small remove-uploaded-image">
-                        <i class="fas fa-times"></i>
-                    </button>
-                `;
-            } else {
-                this.addImageUploadItem(false);
-                const items = document.querySelectorAll('[data-correct="false"]');
-                const lastItem = items[items.length - 1];
-                lastItem.querySelector('.upload-area-small').innerHTML = `
-                    <img src="${imageSrc}" alt="Превью">
-                    <button type="button" class="btn btn-danger btn-small remove-uploaded-image">
-                        <i class="fas fa-times"></i>
-                    </button>
-                `;
-            }
-        });
+        if (question.incorrectImages && question.incorrectImages.length > 0) {
+            question.incorrectImages.forEach((imageSrc, index) => {
+                if (index === 0) {
+                    this.addImageUploadItem(false);
+                    const container = document.querySelector('[data-correct="false"] .upload-area-small');
+                    container.innerHTML = `
+                        <img src="${imageSrc}" alt="Превью">
+                        <button type="button" class="btn btn-danger btn-small remove-uploaded-image">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    `;
+                } else {
+                    this.addImageUploadItem(false);
+                    const items = document.querySelectorAll('[data-correct="false"]');
+                    const lastItem = items[items.length - 1];
+                    lastItem.querySelector('.upload-area-small').innerHTML = `
+                        <img src="${imageSrc}" alt="Превью">
+                        <button type="button" class="btn btn-danger btn-small remove-uploaded-image">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    `;
+                }
+            });
+        } else {
+            this.addImageUploadItem(false);
+        }
     }
 
     fillType2Form(question) {
-        // Очищаем текущие слова кроме первого
-        document.querySelectorAll('.word-item').forEach((item, index) => {
-            if (index > 0) item.remove();
-        });
+        // Очищаем текущие слова
+        document.querySelectorAll('.word-item').forEach(item => item.remove());
 
         // Заполняем слова
-        question.words.forEach((wordData, index) => {
-            if (index === 0) {
-                document.querySelector('.word-input').value = wordData.word;
-                document.querySelector('.position-select').value = wordData.position;
-                if (wordData.image) {
-                    document.querySelector('.word-item .upload-area-small').innerHTML = `
-                        <img src="${wordData.image}" alt="Превью">
-                        <button type="button" class="btn btn-danger btn-small remove-uploaded-image">
-                            <i class="fas fa-times"></i>
-                        </button>
-                    `;
+        if (question.words && question.words.length > 0) {
+            question.words.forEach((wordData, index) => {
+                if (index === 0) {
+                    this.addWordItem();
+                    document.querySelector('.word-input').value = wordData.word || '';
+                    document.querySelector('.position-select').value = wordData.position || 'start';
+                    if (wordData.image) {
+                        document.querySelector('.word-item .upload-area-small').innerHTML = `
+                            <img src="${wordData.image}" alt="Превью">
+                            <button type="button" class="btn btn-danger btn-small remove-uploaded-image">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        `;
+                    }
+                } else {
+                    this.addWordItem();
+                    const items = document.querySelectorAll('.word-item');
+                    const lastItem = items[items.length - 1];
+                    lastItem.querySelector('.word-input').value = wordData.word || '';
+                    lastItem.querySelector('.position-select').value = wordData.position || 'start';
+                    if (wordData.image) {
+                        lastItem.querySelector('.upload-area-small').innerHTML = `
+                            <img src="${wordData.image}" alt="Превью">
+                            <button type="button" class="btn btn-danger btn-small remove-uploaded-image">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        `;
+                    }
                 }
-            } else {
-                this.addWordItem();
-                const items = document.querySelectorAll('.word-item');
-                const lastItem = items[items.length - 1];
-                lastItem.querySelector('.word-input').value = wordData.word;
-                lastItem.querySelector('.position-select').value = wordData.position;
-                if (wordData.image) {
-                    lastItem.querySelector('.upload-area-small').innerHTML = `
-                        <img src="${wordData.image}" alt="Превью">
-                        <button type="button" class="btn btn-danger btn-small remove-uploaded-image">
-                            <i class="fas fa-times"></i>
-                        </button>
-                    `;
-                }
-            }
-        });
+            });
+        } else {
+            this.addWordItem();
+        }
     }
 
     fillType3Form(question) {
-        // Очищаем текущие слоги кроме первого
-        document.querySelectorAll('.syllable-item').forEach((item, index) => {
-            if (index > 0) item.remove();
-        });
+        // Очищаем текущие слоги
+        document.querySelectorAll('.syllable-item').forEach(item => item.remove());
 
         // Заполняем слоги
-        question.syllables.forEach((syllableData, index) => {
-            if (index === 0) {
-                document.querySelector('.syllable-item .word-input').value = syllableData.word;
-                document.querySelector('.syllable-item .pattern-input').value = syllableData.pattern;
-                if (syllableData.image) {
-                    document.querySelector('.syllable-item .upload-area-small').innerHTML = `
-                        <img src="${syllableData.image}" alt="Превью">
-                        <button type="button" class="btn btn-danger btn-small remove-uploaded-image">
-                            <i class="fas fa-times"></i>
-                        </button>
-                    `;
+        if (question.syllables && question.syllables.length > 0) {
+            question.syllables.forEach((syllableData, index) => {
+                if (index === 0) {
+                    this.addSyllableItem();
+                    document.querySelector('.syllable-item .word-input').value = syllableData.word || '';
+                    document.querySelector('.syllable-item .pattern-input').value = syllableData.pattern || '';
+                    if (syllableData.image) {
+                        document.querySelector('.syllable-item .upload-area-small').innerHTML = `
+                            <img src="${syllableData.image}" alt="Превью">
+                            <button type="button" class="btn btn-danger btn-small remove-uploaded-image">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        `;
+                    }
+                } else {
+                    this.addSyllableItem();
+                    const items = document.querySelectorAll('.syllable-item');
+                    const lastItem = items[items.length - 1];
+                    lastItem.querySelector('.word-input').value = syllableData.word || '';
+                    lastItem.querySelector('.pattern-input').value = syllableData.pattern || '';
+                    if (syllableData.image) {
+                        lastItem.querySelector('.upload-area-small').innerHTML = `
+                            <img src="${syllableData.image}" alt="Превью">
+                            <button type="button" class="btn btn-danger btn-small remove-uploaded-image">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        `;
+                    }
                 }
-            } else {
-                this.addSyllableItem();
-                const items = document.querySelectorAll('.syllable-item');
-                const lastItem = items[items.length - 1];
-                lastItem.querySelector('.word-input').value = syllableData.word;
-                lastItem.querySelector('.pattern-input').value = syllableData.pattern;
-                if (syllableData.image) {
-                    lastItem.querySelector('.upload-area-small').innerHTML = `
-                        <img src="${syllableData.image}" alt="Превью">
-                        <button type="button" class="btn btn-danger btn-small remove-uploaded-image">
-                            <i class="fas fa-times"></i>
-                        </button>
-                    `;
-                }
-            }
-        });
+            });
+        } else {
+            this.addSyllableItem();
+        }
     }
 
     fillType4Form(question) {
         // Заполняем категории
-        document.querySelector('.category1-input').value = question.categories[0].name;
-        document.querySelector('.category2-input').value = question.categories[1].name;
+        document.querySelector('.category1-input').value = question.categories?.[0]?.name || '';
+        document.querySelector('.category2-input').value = question.categories?.[1]?.name || '';
 
         // Заполняем элементы категорий
-        this.fillCategoryItems(1, question.categories[0].items);
-        this.fillCategoryItems(2, question.categories[1].items);
+        this.fillCategoryItems(1, question.categories?.[0]?.items || []);
+        this.fillCategoryItems(2, question.categories?.[1]?.items || []);
     }
 
     fillCategoryItems(categoryNumber, items) {
         const container = document.querySelector(`[data-category="${categoryNumber}"]`);
+        if (!container) return;
+
+        // Очищаем контейнер
         container.innerHTML = '';
 
-        items.forEach((itemData, index) => {
-            if (index === 0) {
-                const firstItem = container.querySelector('.category-item') || this.addCategoryItem(categoryNumber);
-                firstItem.querySelector('.item-input').value = itemData.text;
-                if (itemData.image) {
-                    firstItem.querySelector('.upload-area-small').innerHTML = `
-                        <img src="${itemData.image}" alt="Превью">
-                        <button type="button" class="btn btn-danger btn-small remove-uploaded-image">
-                            <i class="fas fa-times"></i>
-                        </button>
-                    `;
-                }
-            } else {
+        // Добавляем элементы
+        if (items.length > 0) {
+            items.forEach((itemData, index) => {
                 this.addCategoryItem(categoryNumber);
                 const categoryItems = container.querySelectorAll('.category-item');
                 const lastItem = categoryItems[categoryItems.length - 1];
-                lastItem.querySelector('.item-input').value = itemData.text;
+                lastItem.querySelector('.item-input').value = itemData.text || '';
                 if (itemData.image) {
                     lastItem.querySelector('.upload-area-small').innerHTML = `
                         <img src="${itemData.image}" alt="Превью">
@@ -1066,19 +1178,32 @@ export class AssignmentManager {
                         </button>
                     `;
                 }
-            }
-        });
+            });
+        } else {
+            this.addCategoryItem(categoryNumber);
+        }
     }
 
     async editAssignment(assignmentId) {
-        const assignment = this.assignments.find(a => a.id == assignmentId);
-        if (assignment) {
-            this.openAssignmentModal(assignment);
+        try {
+            const assignment = this.assignments.find(a => a.id == assignmentId);
+            if (assignment) {
+                this.openAssignmentModal(assignment);
+            }
+        } catch (error) {
+            console.error('Ошибка редактирования задания:', error);
+            this.showNotification('Ошибка при загрузке задания', 'error');
         }
     }
 
     async handleAssignmentSubmit(e) {
         e.preventDefault();
+
+        // Проверяем наличие вопросов
+        if (this.questions.length === 0) {
+            this.showNotification('Добавьте хотя бы один вопрос', 'error');
+            return;
+        }
 
         const formData = {
             material_id: this.currentMaterialId,
